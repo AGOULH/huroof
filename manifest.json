@@ -1,0 +1,22 @@
+{
+  "name": "لعبة الحروف",
+  "short_name": "الحروف",
+  "description": "لعبة الحروف للأطفال — اسم بنت، ولد، جماد، حيوان، طعام، بلد. مع مؤقت دقيقة لكل خانة.",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#CFF8E0",
+  "theme_color": "#19B36B",
+  "categories": ["games", "education", "kids"],
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

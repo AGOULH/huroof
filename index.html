@@ -1,585 +1,576 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html dir="rtl" lang="ar">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>حروف — لعبة الكلمات العربية</title>
-<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
+<meta name="theme-color" content="#19B36B" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="لعبة الحروف" />
+<title>لعبة الحروف</title>
+<link rel="manifest" href="manifest.json" />
+<link rel="apple-touch-icon" href="icon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Lalezar&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet" />
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#0d1117;--card:#161b22;--border:#30363d;
-  --gold:#C9A84C;--gold2:#F0D080;
-  --green:#1a472a;--green-b:#2ea043;
-  --yellow:#4a3200;--yellow-b:#d29922;
-  --absent:#21262d;--absent-b:#30363d;
-  --text:#e6edf3;--muted:#8b949e;
-  --tile:58px;
-}
-@media(max-width:380px){:root{--tile:50px}}
-
-html,body{
-  font-family:'Tajawal',sans-serif;
-  background:var(--bg);color:var(--text);
-  min-height:100vh;
-  display:flex;flex-direction:column;align-items:center;
-  user-select:none;-webkit-tap-highlight-color:transparent;
-}
-
-/* ── HEADER ── */
-header{
-  width:100%;max-width:520px;padding:1rem 1rem .75rem;
-  text-align:center;border-bottom:1px solid var(--border);
-  margin-bottom:.75rem;position:relative;
-}
-.logo{font-size:2.2rem;font-weight:900;color:var(--gold);letter-spacing:4px;line-height:1}
-.logo-sub{font-size:.78rem;color:var(--muted);margin-top:.2rem}
-.header-btns{position:absolute;left:1rem;top:50%;transform:translateY(-50%);display:flex;gap:.4rem}
-.icon-btn{
-  background:none;border:1px solid var(--border);border-radius:8px;
-  color:var(--muted);cursor:pointer;width:36px;height:36px;font-size:1rem;
-  display:flex;align-items:center;justify-content:center;transition:border-color .2s,color .2s;
-}
-.icon-btn:hover{border-color:var(--gold);color:var(--gold)}
-
-/* ── STATS BAR ── */
-.stats-bar{
-  display:flex;gap:2rem;justify-content:center;
-  margin-bottom:.875rem;font-size:.73rem;color:var(--muted);
-}
-.s-num{display:block;font-size:1.4rem;font-weight:700;color:var(--text);text-align:center}
-
-/* ── GRID ── */
-.grid{
-  display:flex;flex-direction:column;gap:.45rem;
-  margin-bottom:1.25rem;
-}
-.row{display:flex;gap:.45rem}
-
-.tile{
-  width:var(--tile);height:var(--tile);
-  border:2px solid var(--border);border-radius:8px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:1.55rem;font-weight:700;
-  transition:border-color .15s;
-}
-.tile.filled{border-color:#6e7681;animation:pop .08s ease}
-@keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.1)}100%{transform:scale(1)}}
-
-.tile.correct {background:var(--green); border-color:var(--green-b);  color:#fff}
-.tile.present {background:var(--yellow);border-color:var(--yellow-b); color:#fff}
-.tile.absent  {background:var(--absent);border-color:var(--absent-b); color:var(--muted)}
-
-.row.shake .tile{animation:shake .45s ease}
-@keyframes shake{
-  0%,100%{transform:translateX(0)}
-  20%{transform:translateX(-7px)}40%{transform:translateX(7px)}
-  60%{transform:translateX(-4px)}80%{transform:translateX(4px)}
-}
-.tile.bounce{animation:bounce .55s ease}
-@keyframes bounce{
-  0%,100%{transform:translateY(0)}
-  30%{transform:translateY(-14px)}60%{transform:translateY(-6px)}
-}
-.tile.flip{animation:flip .45s ease forwards}
-@keyframes flip{
-  0%{transform:scaleY(1)}40%{transform:scaleY(0)}100%{transform:scaleY(1)}
-}
-
-/* ── KEYBOARD ── */
-.keyboard{
-  display:flex;flex-direction:column;gap:.35rem;
-  width:100%;max-width:520px;padding:0 .4rem 1rem;
-}
-.kb-row{display:flex;justify-content:center;gap:.28rem}
-.key{
-  height:50px;border-radius:7px;
-  background:#21262d;border:1px solid #30363d;
-  color:var(--text);font-family:'Tajawal',sans-serif;
-  font-size:1.15rem;font-weight:700;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  flex:1;max-width:38px;
-  transition:background .2s,transform .1s,border-color .2s;
-}
-.key:active{transform:scale(.92)}
-.key.action{max-width:56px;font-size:.78rem;background:#2d333b;border-color:#444c56}
-.key.correct{background:var(--green); border-color:var(--green-b)}
-.key.present{background:var(--yellow);border-color:var(--yellow-b)}
-.key.absent {background:#0d1117;     border-color:#21262d;color:#6e7681}
-
-/* ── TOAST ── */
-.toast{
-  position:fixed;top:1.2rem;left:50%;
-  transform:translateX(-50%) translateY(-80px);
-  background:var(--text);color:var(--bg);
-  padding:.55rem 1.25rem;border-radius:20px;
-  font-weight:700;font-size:.88rem;
-  transition:transform .3s ease;z-index:999;
-  white-space:nowrap;pointer-events:none;
-}
-.toast.show{transform:translateX(-50%) translateY(0)}
-
-/* ── MODALS ── */
-.overlay{
-  display:none;position:fixed;inset:0;
-  background:rgba(0,0,0,.75);backdrop-filter:blur(6px);
-  align-items:center;justify-content:center;z-index:100;
-}
-.overlay.open{display:flex}
-.modal{
-  background:var(--card);border:1px solid var(--border);
-  border-radius:18px;padding:2rem;
-  max-width:360px;width:92%;text-align:center;
-  position:relative;
-}
-.modal-close{
-  position:absolute;top:.75rem;left:.75rem;
-  background:none;border:1px solid var(--border);border-radius:7px;
-  color:var(--muted);cursor:pointer;width:32px;height:32px;font-size:1rem;
-}
-.modal-close:hover{border-color:var(--gold);color:var(--gold)}
-
-/* End modal */
-.end-emoji{font-size:3.2rem;display:block;margin-bottom:.6rem}
-.end-title{font-size:1.5rem;font-weight:900;color:var(--gold);margin-bottom:.35rem}
-.end-msg{font-size:.9rem;color:var(--muted);margin-bottom:1.25rem;line-height:1.6}
-.end-msg b{color:var(--text);font-size:1.1rem}
-.end-share{
-  display:flex;gap:.5rem;flex-direction:column;margin-bottom:1rem;
-}
-/* End stats */
-.es-grid{display:flex;justify-content:space-between;gap:.4rem;margin-bottom:1.1rem}
-.es-item{flex:1;display:flex;flex-direction:column;align-items:center}
-.es-num{font-size:1.35rem;font-weight:900;color:var(--text);line-height:1.1}
-.es-lbl{font-size:.62rem;color:var(--muted);margin-top:.15rem;text-align:center}
-.dist-title{font-size:.78rem;font-weight:700;color:var(--muted);margin-bottom:.5rem;text-align:right}
-.dist-wrap{display:flex;flex-direction:column;gap:.28rem;margin-bottom:1.1rem}
-.dist-row{display:flex;align-items:center;gap:.45rem;direction:rtl}
-.dist-label{font-size:.78rem;font-weight:700;color:var(--muted);width:14px;text-align:center;flex-shrink:0}
-.dist-bar{
-  background:#30363d;color:#fff;font-size:.72rem;font-weight:700;
-  padding:.12rem .45rem;border-radius:4px;min-width:24px;
-  display:flex;align-items:center;justify-content:flex-end;
-  transition:width .5s ease;
-}
-.dist-bar.dist-hot{background:var(--green-b)}
-.btn-share{
-  background:#0d419d;color:#fff;border:none;border-radius:10px;
-  padding:.65rem;font-family:'Tajawal',sans-serif;font-weight:700;font-size:.9rem;
-  cursor:pointer;transition:opacity .2s;display:flex;align-items:center;justify-content:center;gap:.4rem;
-}
-.btn-share:hover{opacity:.85}
-.btn-new{
-  background:linear-gradient(135deg,#b8872a,#8a6015);
-  color:#fff3d0;border:none;border-radius:10px;
-  padding:.7rem;font-family:'Tajawal',sans-serif;font-weight:700;font-size:.9rem;
-  cursor:pointer;transition:opacity .2s;width:100%;
-}
-.btn-new:hover{opacity:.88}
-
-/* Help modal */
-.help-title{font-size:1.3rem;font-weight:900;color:var(--gold);margin-bottom:1rem}
-.example{margin-bottom:1rem;text-align:right}
-.example p{font-size:.78rem;color:var(--muted);margin-top:.35rem;line-height:1.5}
-.ex-row{display:flex;gap:.35rem;margin-bottom:.3rem}
-.ex-tile{
-  width:42px;height:42px;border:2px solid var(--border);border-radius:6px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:1.2rem;font-weight:700;
-}
-.ex-tile.correct{background:var(--green);border-color:var(--green-b);color:#fff}
-.ex-tile.present{background:var(--yellow);border-color:var(--yellow-b);color:#fff}
-.ex-tile.absent {background:var(--absent);border-color:var(--absent-b);color:var(--muted)}
-.rule-row{display:flex;align-items:flex-start;gap:.6rem;text-align:right;margin-bottom:.6rem;font-size:.8rem;line-height:1.5}
-.rule-icon{font-size:1.1rem;flex-shrink:0}
+  :root{
+    --bg-1:#A7E1FF; --bg-2:#CFF8E0;
+    --green:#19B36B; --green-d:#0f8a51;
+    --yellow:#FFC83D; --yellow-d:#e0a51f;
+    --coral:#FF6B6B; --coral-d:#df4f4f;
+    --blue:#3DA5FF;  --blue-d:#2b86d8;
+    --purple:#9B5DE5;--purple-d:#7d3fd0;
+    --ink:#2D2A4A;   --muted:#6b6890;
+    --card:#ffffff;  --ring:rgba(45,42,74,.10);
+    --shadow:0 18px 40px rgba(45,42,74,.18);
+    --display:'Lalezar', 'Tajawal', system-ui, sans-serif;
+    --body:'Tajawal', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{margin:0; font-family:var(--body); color:var(--ink);
+    background:linear-gradient(160deg,var(--bg-1),var(--bg-2) 70%);
+    overflow-x:hidden; position:relative; min-height:100dvh;
+    -webkit-user-select:none; user-select:none;}
+  .blob{position:fixed; border-radius:50%; filter:blur(8px); opacity:.55; z-index:0; pointer-events:none;}
+  .b1{width:160px;height:160px;background:var(--yellow);top:-40px;left:-30px;}
+  .b2{width:180px;height:180px;background:var(--coral);bottom:-50px;right:-40px;opacity:.4;}
+  .b3{width:120px;height:120px;background:var(--purple);top:35%;right:-30px;opacity:.35;}
+  .b4{width:110px;height:110px;background:var(--blue);bottom:20%;left:-30px;opacity:.4;}
+  .app{position:relative; z-index:1; max-width:480px; margin:0 auto; min-height:100dvh;
+    display:flex; flex-direction:column;
+    padding:max(16px,env(safe-area-inset-top)) 18px max(20px,env(safe-area-inset-bottom));}
+  .screen{display:none; flex:1; flex-direction:column; animation:pop .4s ease both;}
+  .screen.active{display:flex;}
+  @keyframes pop{from{opacity:0; transform:translateY(14px) scale(.98);} to{opacity:1; transform:none;}}
+  .btn{font-family:var(--body); font-weight:800; font-size:20px; color:#fff; border:none;
+    border-radius:22px; padding:16px 22px; width:100%; cursor:pointer; position:relative;
+    transition:transform .08s, box-shadow .08s, filter .15s;
+    box-shadow:0 6px 0 var(--green-d), var(--shadow); background:var(--green);}
+  .btn:active{transform:translateY(4px); box-shadow:0 2px 0 var(--green-d), var(--shadow);}
+  .btn:disabled{filter:grayscale(.6) brightness(1.05); opacity:.55; cursor:not-allowed;}
+  .btn.coral{background:var(--coral); box-shadow:0 6px 0 var(--coral-d), var(--shadow);}
+  .btn.coral:active{box-shadow:0 2px 0 var(--coral-d), var(--shadow);}
+  .btn.blue{background:var(--blue); box-shadow:0 6px 0 var(--blue-d), var(--shadow);}
+  .btn.blue:active{box-shadow:0 2px 0 var(--blue-d), var(--shadow);}
+  .btn.yellow{background:var(--yellow); color:var(--ink); box-shadow:0 6px 0 var(--yellow-d), var(--shadow);}
+  .btn.yellow:active{box-shadow:0 2px 0 var(--yellow-d), var(--shadow);}
+  .btn.purple{background:var(--purple); box-shadow:0 6px 0 var(--purple-d), var(--shadow);}
+  .btn.purple:active{box-shadow:0 2px 0 var(--purple-d), var(--shadow);}
+  .btn.ghost{background:#fff; color:var(--ink); box-shadow:0 6px 0 #d8d6e8, var(--shadow); font-size:18px;}
+  .btn.ghost:active{box-shadow:0 2px 0 #d8d6e8, var(--shadow);}
+  .btn.small{font-size:17px; padding:13px 16px;}
+  .top-bar{display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:2px;}
+  .top-actions{display:flex; gap:10px;}
+  .icon-btn{width:46px;height:46px;border-radius:16px;border:none;background:#fff;
+    box-shadow:0 4px 0 #d8d6e8; font-size:22px; cursor:pointer; display:grid; place-items:center;
+    transition:transform .08s, box-shadow .08s;}
+  .icon-btn:active{transform:translateY(3px); box-shadow:0 1px 0 #d8d6e8;}
+  .icon-btn.off{opacity:.45;}
+  .hero{text-align:center; margin:6px 0 2px;}
+  .title{font-family:var(--display); font-size:56px; line-height:1; color:#fff;
+    text-shadow:0 4px 0 var(--purple-d), 0 8px 18px rgba(45,42,74,.25); letter-spacing:1px;}
+  .title .a{display:inline-block; animation:bob 2.4s ease-in-out infinite;}
+  @keyframes bob{0%,100%{transform:translateY(0) rotate(-2deg);}50%{transform:translateY(-6px) rotate(2deg);}}
+  .tags{display:flex; flex-wrap:wrap; justify-content:center; gap:7px; margin:14px 0 6px;}
+  .tag{background:#fff; border-radius:999px; padding:6px 12px; font-weight:700; font-size:14px; color:var(--ink); box-shadow:0 3px 0 var(--ring);}
+  .card{background:var(--card); border-radius:26px; padding:18px; box-shadow:var(--shadow); margin-top:14px;}
+  .label{font-weight:800; font-size:18px; margin:0 4px 10px; display:flex; align-items:center; gap:8px;}
+  .name-input{width:100%; border:3px solid #ece9fb; border-radius:18px; padding:15px 18px;
+    font-family:var(--body); font-size:20px; font-weight:700; color:var(--ink); text-align:center;
+    background:#fbfbff; outline:none; transition:border-color .15s, box-shadow .15s;}
+  .name-input:focus{border-color:var(--blue); box-shadow:0 0 0 4px rgba(61,165,255,.18);}
+  .name-input::placeholder{color:#b9b6d2; font-weight:600;}
+  .animals{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:6px;}
+  .animal{aspect-ratio:1; border:3px solid #eee; border-radius:20px; background:#fbfbff;
+    font-size:34px; cursor:pointer; display:grid; place-items:center; position:relative;
+    transition:transform .12s, border-color .12s, background .12s;}
+  .animal:active{transform:scale(.92);}
+  .animal.sel{border-color:var(--green); background:#eafff4; transform:scale(1.04);
+    box-shadow:0 6px 16px rgba(25,179,107,.3); animation:wobble .5s ease;}
+  .animal.sel::after{content:"✓"; position:absolute; top:-8px; inset-inline-start:-8px;
+    width:24px;height:24px; background:var(--green); color:#fff; border-radius:50%;
+    font-size:14px; display:grid; place-items:center; font-weight:800; box-shadow:0 2px 6px rgba(0,0,0,.2);}
+  @keyframes wobble{0%,100%{transform:scale(1.04) rotate(0);}25%{transform:scale(1.04) rotate(-8deg);}75%{transform:scale(1.04) rotate(8deg);}}
+  .hint{text-align:center; color:var(--muted); font-weight:600; font-size:14px; margin-top:12px;}
+  .mode-btns{margin-top:16px; display:flex; flex-direction:column; gap:12px;}
+  .rules-body{display:none; background:#fff; border-radius:22px; padding:16px 18px; box-shadow:var(--shadow); margin-top:12px;
+    font-weight:600; line-height:1.9; font-size:15px; color:var(--ink);}
+  .rules-body.open{display:block; animation:pop .3s ease both;}
+  .rules-body ul{margin:6px 0; padding-inline-start:22px;}
+  .lb-mini{margin-top:14px;}
+  .lb-row{display:flex; align-items:center; gap:10px; background:#fff; border-radius:16px; padding:10px 14px;
+    margin-top:8px; box-shadow:0 4px 0 var(--ring); font-weight:700;}
+  .lb-row .rank{width:30px;height:30px;border-radius:50%;background:var(--yellow);color:var(--ink);
+    display:grid;place-items:center;font-weight:800;font-size:15px;}
+  .lb-row .em{font-size:26px;}
+  .lb-row .nm{flex:1; font-size:16px;}
+  .lb-row .sc{color:var(--green); font-weight:800;}
+  .lb-row .stat{font-size:13px; color:var(--muted); font-weight:700;}
+  .lb-row.me{background:#eafff4; outline:2px solid var(--green);}
+  .lb-row.win{background:linear-gradient(90deg,#fff7df,#fff);}
+  .center-col{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px; text-align:center;}
+  .mascot{font-size:96px; animation:bob 2.2s ease-in-out infinite; line-height:1;}
+  .bubble{background:#fff; border-radius:24px; padding:14px 22px; box-shadow:var(--shadow);
+    font-weight:800; font-size:20px; position:relative; max-width:300px;}
+  .bubble::after{content:""; position:absolute; bottom:-10px; inset-inline-start:50%; transform:translateX(50%);
+    border:10px solid transparent; border-top-color:#fff; border-bottom:0;}
+  .eyebrow{font-weight:800; color:var(--purple-d); font-size:18px; letter-spacing:1px;}
+  .letter-card{width:160px; height:170px; background:#fff; border-radius:34px; box-shadow:var(--shadow);
+    display:grid; place-items:center; font-family:var(--display); font-size:110px; color:var(--green);
+    animation:land .6s cubic-bezier(.2,1.4,.5,1) both; border:5px solid #eafff4;}
+  @keyframes land{0%{transform:scale(.2) rotate(-30deg); opacity:0;}60%{transform:scale(1.12) rotate(6deg);}100%{transform:scale(1) rotate(0); opacity:1;}}
+  .count-num{font-family:var(--display); font-size:160px; color:#fff; line-height:1;
+    text-shadow:0 6px 0 var(--purple-d), 0 12px 24px rgba(45,42,74,.3); animation:countpop .9s ease both;}
+  @keyframes countpop{0%{transform:scale(.3); opacity:0;}40%{transform:scale(1.2);}100%{transform:scale(1); opacity:1;}}
+  .play-head{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:6px;}
+  .pill{background:#fff; border-radius:999px; padding:8px 14px; font-weight:800; box-shadow:0 4px 0 var(--ring);
+    display:flex; align-items:center; gap:8px; font-size:15px;}
+  .pill .big{font-family:var(--display); font-size:26px; color:var(--green); line-height:1;}
+  .player-pill .em{font-size:22px;}
+  .dots{display:flex; gap:6px; justify-content:center; margin:4px 0 2px;}
+  .dot{width:10px;height:10px;border-radius:50%;background:#fff; opacity:.6; transition:.2s;}
+  .dot.done{background:var(--green); opacity:1;}
+  .dot.cur{background:var(--yellow); opacity:1; transform:scale(1.4);}
+  .timer-wrap{display:flex; justify-content:center; margin:10px 0 6px; position:relative;}
+  .ring{width:130px; height:130px; transform:rotate(-90deg);}
+  .ring-bg{fill:none; stroke:#ffffff; stroke-width:12; opacity:.7;}
+  .ring-fg{fill:none; stroke:var(--green); stroke-width:12; stroke-linecap:round; transition:stroke .3s;}
+  .timer-num{position:absolute; inset:0; display:grid; place-items:center; font-family:var(--display); font-size:46px; color:var(--ink);}
+  .timer-num.low{color:var(--coral); animation:pulse .6s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.12);}}
+  .cat-card{background:#fff; border-radius:28px; padding:22px 20px; box-shadow:var(--shadow); text-align:center; margin-top:8px;}
+  .cat-emoji{font-size:56px; line-height:1;}
+  .cat-name{font-family:var(--display); font-size:34px; margin-top:6px; color:var(--ink);}
+  .cat-prompt{color:var(--muted); font-weight:700; font-size:16px; margin-top:4px;}
+  .cat-prompt b{color:var(--green); font-family:var(--display); font-size:22px;}
+  .answer{width:100%; border:3px solid #ece9fb; border-radius:18px; padding:16px;
+    font-family:var(--body); font-size:24px; font-weight:800; color:var(--ink); text-align:center;
+    background:#fbfbff; outline:none; margin-top:16px; transition:border-color .15s, box-shadow .15s;}
+  .answer:focus{border-color:var(--blue); box-shadow:0 0 0 4px rgba(61,165,255,.18);}
+  .answer.good{border-color:var(--green); box-shadow:0 0 0 4px rgba(25,179,107,.18);}
+  .live{height:24px; margin-top:8px; font-weight:800; font-size:15px;}
+  .live.ok{color:var(--green);}
+  .live.no{color:var(--muted);}
+  .mp-note{text-align:center; margin-top:8px; color:var(--purple-d); font-weight:800; font-size:14px;}
+  .play-actions{margin-top:auto; padding-top:14px;}
+  .splash{position:fixed; inset:0; z-index:30; display:none; place-items:center; background:rgba(45,42,74,.35); backdrop-filter:blur(2px);}
+  .splash.show{display:grid; animation:pop .25s ease both;}
+  .splash .box{background:#fff; border-radius:30px; padding:26px 34px; box-shadow:var(--shadow); text-align:center; font-weight:800;}
+  .splash .em{font-size:64px;}
+  .splash .msg{font-family:var(--display); font-size:32px; margin-top:6px; color:var(--ink);}
+  .chip{position:fixed; z-index:28; left:50%; top:42%; transform:translateX(-50%);
+    background:var(--green); color:#fff; font-weight:800; font-size:22px; padding:8px 18px; border-radius:999px;
+    box-shadow:var(--shadow); pointer-events:none; animation:chipUp 1s ease both;}
+  @keyframes chipUp{0%{opacity:0; transform:translate(-50%,10px) scale(.7);}30%{opacity:1; transform:translate(-50%,-6px) scale(1.05);}100%{opacity:0; transform:translate(-50%,-46px) scale(1);}}
+  .res-head{text-align:center; margin-top:4px;}
+  .res-mascot{font-size:78px; animation:bob 2s ease-in-out infinite;}
+  .res-title{font-family:var(--display); font-size:38px; color:#fff; text-shadow:0 3px 0 var(--purple-d), 0 6px 14px rgba(45,42,74,.25);}
+  .stars{display:flex; justify-content:center; gap:6px; margin:8px 0;}
+  .star{font-size:34px; filter:drop-shadow(0 3px 4px rgba(0,0,0,.15)); animation:land .5s ease both;}
+  .star.off{opacity:.3; filter:grayscale(1);}
+  .score-big{font-family:var(--display); font-size:28px; text-align:center; color:#fff; background:rgba(255,255,255,.18); border-radius:20px; padding:8px; margin-top:4px;}
+  .review{background:#fff; border-radius:24px; padding:14px; box-shadow:var(--shadow); margin-top:14px;}
+  .rev-row{display:flex; align-items:center; gap:12px; padding:10px 6px; border-bottom:2px solid #f3f1fb;}
+  .rev-row:last-child{border-bottom:none;}
+  .rev-row .ce{font-size:26px;}
+  .rev-row .rc{flex:1;}
+  .rev-row .rc .ct{font-weight:800; font-size:15px;}
+  .rev-row .rc .ans{font-weight:700; color:var(--muted); font-size:15px;}
+  .rev-row .mark{font-size:24px;}
+  .res-actions{margin-top:16px; display:flex; flex-direction:column; gap:12px;}
+  .room-code{background:#fff; border-radius:26px; padding:18px; box-shadow:var(--shadow); text-align:center; margin-top:6px;}
+  .room-code .lbl{font-weight:800; color:var(--muted); font-size:15px;}
+  .room-code .code{font-family:var(--display); font-size:60px; letter-spacing:10px; color:var(--purple-d); line-height:1.1;}
+  .room-code .share{color:var(--muted); font-weight:700; font-size:13px; margin-top:4px;}
+  .seg{display:flex; gap:8px; margin-top:10px;}
+  .seg button{flex:1; border:3px solid #ece9fb; background:#fbfbff; border-radius:16px; padding:12px;
+    font-family:var(--body); font-weight:800; font-size:16px; color:var(--ink); cursor:pointer; transition:.12s;}
+  .seg button.on{border-color:var(--green); background:#eafff4; color:var(--green-d);}
+  .or{text-align:center; color:var(--muted); font-weight:800; margin:14px 0; position:relative;}
+  .or::before,.or::after{content:""; position:absolute; top:50%; width:38%; height:2px; background:#e3e0f2;}
+  .or::before{inset-inline-start:0;} .or::after{inset-inline-end:0;}
+  .mp-error{text-align:center; color:var(--coral-d); font-weight:800; font-size:15px; margin-top:10px; min-height:20px; line-height:1.6;}
+  .wait-note{text-align:center; color:var(--purple-d); font-weight:800; font-size:15px; margin-top:12px;}
+  #confetti{position:fixed; inset:0; z-index:25; pointer-events:none; display:none;}
+  @media (max-height:680px){
+    .title{font-size:46px;} .ring{width:112px;height:112px;} .timer-num{font-size:40px;}
+    .mascot{font-size:74px;} .count-num{font-size:130px;}
+  }
+  @media (prefers-reduced-motion: reduce){ *{animation:none !important; transition:none !important;} }
+  :focus-visible{outline:3px solid var(--blue); outline-offset:2px;}
 </style>
 </head>
 <body>
+  <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div>
+  <div class="app">
 
-<header>
-  <div class="header-btns">
-    <button class="icon-btn" onclick="openHelp()" title="كيف تلعب؟">❓</button>
-  </div>
-  <div class="logo">حُروف</div>
-  <div class="logo-sub">خمّن الكلمة في ٦ محاولات</div>
-</header>
-
-<div class="stats-bar">
-  <div><span class="s-num" id="s-played">0</span>ألعاب</div>
-  <div><span class="s-num" id="s-wins">0</span>انتصارات</div>
-  <div><span class="s-num" id="s-streak">0</span>تتالي</div>
-</div>
-
-<div class="grid" id="grid"></div>
-<div class="keyboard" id="keyboard"></div>
-
-<!-- Toast -->
-<div class="toast" id="toast"></div>
-
-<!-- End overlay -->
-<div class="overlay" id="end-overlay">
-  <div class="modal">
-    <span class="end-emoji" id="end-emoji"></span>
-    <div class="end-title" id="end-title"></div>
-    <div class="end-msg" id="end-msg"></div>
-
-    <div class="es-grid">
-      <div class="es-item"><span class="es-num" id="es-played">0</span><span class="es-lbl">ألعاب</span></div>
-      <div class="es-item"><span class="es-num" id="es-pct">0%</span><span class="es-lbl">فوز</span></div>
-      <div class="es-item"><span class="es-num" id="es-streak">0</span><span class="es-lbl">تتالي</span></div>
-      <div class="es-item"><span class="es-num" id="es-best">0</span><span class="es-lbl">أفضل تتالي</span></div>
-    </div>
-    <div class="dist-title">توزيع المحاولات</div>
-    <div class="dist-wrap" id="dist-wrap"></div>
-
-    <div class="end-share">
-      <button class="btn-share" id="btn-share" onclick="shareResult()">📋 نسخ النتيجة</button>
-    </div>
-    <button class="btn-new" onclick="newGame()">🔄 لعبة جديدة</button>
-  </div>
-</div>
-
-<!-- Help overlay -->
-<div class="overlay" id="help-overlay">
-  <div class="modal">
-    <button class="modal-close" onclick="closeHelp()">✕</button>
-    <div class="help-title">كيف تلعب حروف؟</div>
-
-    <div class="example">
-      <div class="ex-row">
-        <div class="ex-tile correct">س</div>
-        <div class="ex-tile">ي</div>
-        <div class="ex-tile">ا</div>
-        <div class="ex-tile">ر</div>
-        <div class="ex-tile">ة</div>
+    <!-- START -->
+    <section class="screen active" id="screen-start">
+      <div class="top-bar">
+        <div></div>
+        <div class="top-actions">
+          <button class="icon-btn" id="voiceBtn" title="صوت التشجيع">🗣️</button>
+          <button class="icon-btn" id="soundBtn" title="الصوت">🔊</button>
+          <button class="icon-btn" id="helpBtn" title="كيف نلعب">❓</button>
+        </div>
       </div>
-      <p>الحرف <b>س</b> موجود في المكان الصحيح</p>
-    </div>
-
-    <div class="example">
-      <div class="ex-row">
-        <div class="ex-tile">ك</div>
-        <div class="ex-tile present">ت</div>
-        <div class="ex-tile">ا</div>
-        <div class="ex-tile">ب</div>
-        <div class="ex-tile">ة</div>
+      <div class="hero"><div class="title"><span class="a">لُعبة</span> الحُروف</div></div>
+      <div class="tags">
+        <span class="tag">🌸 اسم بنت</span><span class="tag">👦 اسم ولد</span><span class="tag">📦 جماد</span>
+        <span class="tag">🦊 حيوان</span><span class="tag">🍎 طعام</span><span class="tag">🌍 بلد</span>
       </div>
-      <p>الحرف <b>ت</b> موجود في الكلمة لكن في مكان مختلف</p>
-    </div>
-
-    <div class="example">
-      <div class="ex-row">
-        <div class="ex-tile">ر</div>
-        <div class="ex-tile">ي</div>
-        <div class="ex-tile absent">ا</div>
-        <div class="ex-tile">ض</div>
-        <div class="ex-tile">ة</div>
+      <div class="rules-body" id="rulesBody">
+        <ul>
+          <li>نختار <b>حرف</b> عشوائي، واكتب كلمة تبدأ به لكل خانة.</li>
+          <li>عندك <b>وقت</b> لكل خانة، وبعدها ننتقل للي بعدها.</li>
+          <li>كل إجابة صحيحة = ⭐ + ١٠ نقاط.</li>
+          <li><b>تحدي الأصدقاء:</b> العبوا نفس الحرف على جوالات مختلفة، ومين يجمع نقاط أكثر يفوز! 🏆</li>
+        </ul>
       </div>
-      <p>الحرف <b>ا</b> غير موجود في الكلمة</p>
-    </div>
+      <div class="card">
+        <div class="label">✏️ وش اسمك؟</div>
+        <input class="name-input" id="nameInput" type="text" inputmode="text" maxlength="14" placeholder="اكتب اسمك هنا" autocomplete="off" />
+      </div>
+      <div class="card">
+        <div class="label">🐾 اختر شخصيتك</div>
+        <div class="animals" id="animals"></div>
+      </div>
+      <div class="hint" id="startHint">اكتب اسمك واختر شخصية عشان نبدأ 👆</div>
+      <div class="mode-btns">
+        <button class="btn" id="soloBtn" disabled>العب لحالك ▶️</button>
+        <button class="btn purple" id="mpBtn" disabled>تحدي الأصدقاء 👥</button>
+      </div>
+      <div class="lb-mini" id="lbMini"></div>
+    </section>
 
-    <div style="border-top:1px solid var(--border);padding-top:1rem;text-align:right">
-      <div class="rule-row"><span class="rule-icon">📝</span>اكتب كلمة من ٥ حروف واضغط <b>↵</b></div>
-      <div class="rule-row"><span class="rule-icon">🎯</span>لديك ٦ محاولات للوصول إلى الكلمة الصحيحة</div>
-      <div class="rule-row"><span class="rule-icon">✍️</span>الهمزات (أ إ آ) تُحسب مثل الألف (ا)</div>
-      <div class="rule-row"><span class="rule-icon">💡</span>كلمة جديدة في كل لعبة</div>
-    </div>
+    <!-- LOBBY -->
+    <section class="screen" id="screen-lobby">
+      <div class="top-bar">
+        <button class="icon-btn" id="lobbyBackBtn" title="رجوع">⬅️</button>
+        <div class="title" style="font-size:34px;">التحدي 👥</div>
+        <div style="width:46px;"></div>
+      </div>
+      <div id="lobbyChoose">
+        <div class="card" style="text-align:center;">
+          <div class="label" style="justify-content:center;">🎮 ابدأ تحدي جديد</div>
+          <button class="btn" id="createRoomBtn">أنشئ غرفة ✨</button>
+        </div>
+        <div class="or">أو</div>
+        <div class="card">
+          <div class="label">🔑 عندك رمز غرفة؟</div>
+          <input class="name-input" id="joinCodeInput" type="text" inputmode="numeric" maxlength="4" placeholder="٤ أرقام" autocomplete="off" style="letter-spacing:8px;" />
+          <div style="margin-top:12px;"><button class="btn blue" id="joinRoomBtn">ادخل الغرفة ➡️</button></div>
+        </div>
+        <div class="mp-error" id="lobbyError"></div>
+      </div>
+      <div id="lobbyRoom" style="display:none;">
+        <div class="room-code">
+          <div class="lbl">رمز الغرفة — شاركه مع أصدقائك</div>
+          <div class="code" id="roomCodeBig">----</div>
+          <div class="share">يكتبون نفس الرمز في خانة «عندك رمز غرفة؟»</div>
+        </div>
+        <div class="card">
+          <div class="label">👨‍👩‍👧‍👦 اللاعبون <span id="playersCount" style="color:var(--muted);font-weight:700;"></span></div>
+          <div id="playersList"></div>
+        </div>
+        <div id="hostControls" style="display:none;">
+          <div class="card">
+            <div class="label">⏱️ وقت كل خانة</div>
+            <div class="seg" id="timeSeg">
+              <button data-sec="30">٣٠ ثانية</button>
+              <button data-sec="60" class="on">دقيقة</button>
+            </div>
+          </div>
+          <div style="margin-top:14px;"><button class="btn" id="startChallengeBtn">ابدأ التحدي 🚀</button></div>
+        </div>
+        <div id="joinWaitNote" class="wait-note" style="display:none;">في انتظار المضيف يبدأ التحدي… 🎈</div>
+        <div style="margin-top:14px;"><button class="btn ghost small" id="leaveRoomBtn">اخرج من الغرفة</button></div>
+        <div class="mp-error" id="roomError"></div>
+      </div>
+    </section>
 
-    <button class="btn-new" style="margin-top:1rem" onclick="closeHelp()">ابدأ اللعب!</button>
+    <!-- REVEAL -->
+    <section class="screen" id="screen-reveal">
+      <div class="center-col">
+        <div class="mascot" id="revealMascot">🦁</div>
+        <div class="eyebrow">حرف اليوم</div>
+        <div class="letter-card" id="revealLetter">أ</div>
+        <div class="bubble" id="revealBubble">يلا يا بطل، جاهز؟</div>
+        <div style="width:100%; max-width:320px; margin-top:6px;"><button class="btn yellow" id="goBtn">يلا نبدأ ⏱️</button></div>
+      </div>
+    </section>
+
+    <!-- COUNT-IN -->
+    <section class="screen" id="screen-countin">
+      <div class="center-col">
+        <div class="eyebrow" id="countTitle">استعدّوا!</div>
+        <div class="count-num" id="countNum">3</div>
+        <div class="bubble">حرف اليوم: <b id="countLetterHint" style="font-family:var(--display); font-size:26px; color:var(--green);">أ</b></div>
+      </div>
+    </section>
+
+    <!-- PLAY -->
+    <section class="screen" id="screen-play">
+      <div class="play-head">
+        <div class="pill"><span>الحرف</span><span class="big" id="playLetter">أ</span></div>
+        <div class="pill player-pill"><span class="em" id="playAnimal">🦁</span><span id="playName">لاعب</span></div>
+      </div>
+      <div class="dots" id="dots"></div>
+      <div class="timer-wrap">
+        <svg class="ring" viewBox="0 0 130 130">
+          <circle class="ring-bg" cx="65" cy="65" r="56"></circle>
+          <circle class="ring-fg" id="ringFg" cx="65" cy="65" r="56"></circle>
+        </svg>
+        <div class="timer-num" id="timerNum">60</div>
+      </div>
+      <div class="cat-card">
+        <div class="cat-emoji" id="catEmoji">🌸</div>
+        <div class="cat-name" id="catName">اسم بنت</div>
+        <div class="cat-prompt">اكتب يبدأ بحرف <b id="catLetter">أ</b></div>
+        <input class="answer" id="answer" type="text" inputmode="text" maxlength="24" placeholder="اكتب هنا..." autocomplete="off" />
+        <div class="live no" id="live"></div>
+      </div>
+      <div class="mp-note" id="mpNote" style="display:none;">⚡ الكل يلعب نفس الحرف الآن — اكتب بسرعة!</div>
+      <div class="play-actions" id="playActions"><button class="btn blue" id="nextBtn">التالي ⏭️</button></div>
+    </section>
+
+    <!-- RESULTS -->
+    <section class="screen" id="screen-results">
+      <div class="res-head">
+        <div class="res-mascot" id="resMascot">🦁</div>
+        <div class="res-title" id="resTitle">أحسنت!</div>
+        <div class="stars" id="resStars"></div>
+        <div class="score-big" id="resScore">النقاط: 0</div>
+      </div>
+      <div id="soloResults">
+        <div class="review" id="review"></div>
+        <div class="res-actions">
+          <button class="btn" id="againBtn">العب مرة ثانية 🔁</button>
+          <button class="btn coral" id="newBtn">لاعب جديد 👤</button>
+        </div>
+      </div>
+      <div id="mpResults" style="display:none;">
+        <div class="card">
+          <div class="label">🏆 النتائج</div>
+          <div id="mpLeaderboard"></div>
+        </div>
+        <div class="res-actions">
+          <button class="btn" id="newRoundBtn" style="display:none;">جولة جديدة 🔁</button>
+          <div class="wait-note" id="waitHostNote" style="display:none;">في انتظار المضيف للجولة الجديدة…</div>
+          <button class="btn coral" id="leaveRoomBtn2">اخرج من اللعبة 👋</button>
+        </div>
+      </div>
+    </section>
+
   </div>
-</div>
+  <div class="splash" id="splash"><div class="box"><div class="em" id="splashEm">⭐</div><div class="msg" id="splashMsg">أحسنت!</div></div></div>
+  <canvas id="confetti"></canvas>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
-// ── WORD LIST (5 Arabic characters each) ──
-const WORDS = [
-  // مفاهيم وأماكن
-  'مدرسة','سيارة','حديقة','جامعة','طالبة','كتابة','نافذة','خريطة','أحلام','فراشة',
-  'أشجار','مكتبة','أسماك','أقلام','أبواب','رياضة','ثقافة','عبارة','إجابة','حضارة',
-  'طبيعة','صناعة','عدالة','كرامة','سلامة','شجاعة','حكومة','قيادة','بناية','ذاكرة',
-  'نظافة','وطنية','حلاوة','صداقة','سعادة','بطاقة','إجازة','دراسة','سياسة','تجارة',
-  'وزارة','حقيبة','رسالة','ألوان','أحجار','أسرار','أفكار','أخبار','قمصان','طوابع',
-  // نقل ومركبات
-  'سفينة','طائرة','قطارة','دراجة','حافلة','شاحنة','مركبة','قاطرة','عربات','زوارق',
-  // طبيعة وفلك
-  'جزيرة','صحراء','غابات','بحيرة','نجومة','كواكب','قمرية','شمسية','غيومة','أمطار',
-  'ثلوجة','رياحة','عواصف','حرارة','برودة','رطوبة','جبالة','وديان','سهولة','هضبات',
-  // طعام
-  'تفاحة','موزات','رمانة','مانجو','كرزات','خوخات','عنبية','فطائر','شطيرة','عصائر',
-  'معجون','مخبوز','جزرات','بطاطس','طماطم','خيارة','فلفلة','بصلات','ثومات','ليمون',
-  'حليبة','زبادي','عسلية','تمرات','لوزات','فستقة','سمسمة','قهوات','شايات','سكرية',
-  // مهن
-  'معلمة','طبيبة','مهندس','محامي','ممرضة','نجارة','حدادة','خبازة','صيادة','فلاحة',
-  'راعية','تاجرة','كاتبة','رسامة','شاعرة','عالمة','باحثة','قاضية','شرطية','جندية',
-  'قائدة','زعيمة','رئيسة','وزيرة','سفيرة','أميرة','حكيمة','مدربة','لاعبة','طيارة'
-];
+(function(){
+  "use strict";
+  // ===== إعدادات Firebase (للتحدي بين الأجهزة) — الصق إعدادات مشروعك هنا =====
+  var FIREBASE_CONFIG = {
+    apiKey: "PASTE_API_KEY",
+    authDomain: "PASTE_PROJECT.firebaseapp.com",
+    projectId: "PASTE_PROJECT_ID",
+    storageBucket: "PASTE_PROJECT.appspot.com",
+    messagingSenderId: "PASTE_SENDER_ID",
+    appId: "PASTE_APP_ID"
+  };
 
-// ── KEYBOARD ROWS ──
-const KB_ROWS = [
-  ['ض','ص','ث','ق','ف','غ','ع','ه','خ','ح','ج'],
-  ['ش','س','ي','ب','ل','ا','ت','ن','م','ك','ط'],
-  ['ذ','ئ','ء','ؤ','ر','ى','ة','و','ز','ظ','د'],
-  ['⌫','أ','إ','آ','↵']
-];
+  var ANIMALS = ["🦁","🐯","🐼","🦊","🐱","🐰","🐨","🐵","🐸","🐬","🐘","🦄"];
+  var CHEERS  = ["يلا يا بطل!","حرف حلو، جاهز؟","نبدأ المغامرة!","وريهم شطارتك!","يلا نلعب!"];
+  var VOICE_GOOD = ["أحسنت","ممتاز","رائع","بطل","شاطر"];
+  var LETTERS = ["أ","ب","ت","ج","ح","خ","د","ر","ز","س","ش","ص","ط","ع","ف","ق","ك","ل","م","ن","ه","و","ي"];
+  var CATS = [
+    {key:"girl",emoji:"🌸",name:"اسم بنت"},{key:"boy",emoji:"👦",name:"اسم ولد"},
+    {key:"thing",emoji:"📦",name:"جماد"},{key:"animal",emoji:"🦊",name:"حيوان"},
+    {key:"food",emoji:"🍎",name:"طعام"},{key:"country",emoji:"🌍",name:"بلد"}
+  ];
+  var S = {
+    name:"",animal:"",letter:"",idx:0,answers:[],scores:[],
+    timeLeft:60,tid:null,sound:true,voice:true,mode:"solo",
+    perCat:60,isHost:false,roomCode:"",playerId:"",
+    startedAt:0,mpRound:-1,mpCurIdx:-1,mpInterval:null,mpRunToken:0,mpLastCount:null,players:[]
+  };
 
-// Normalize alef variants for comparison
-function norm(ch){return ch.replace(/[أإآ]/g,'ا')}
+  function $(id){ return document.getElementById(id); }
+  function show(screen){ var a=document.querySelectorAll(".screen"); for(var i=0;i<a.length;i++) a[i].classList.remove("active"); $(screen).classList.add("active"); window.scrollTo(0,0); }
+  function isActive(id){ return $(id).classList.contains("active"); }
+  function rand(a){ return a[Math.floor(Math.random()*a.length)]; }
+  function escapeHtml(s){ return (s||"").replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];}); }
 
-// ── STATE ──
-let secret='', gridData=[], curRow=0, curCol=0, done=false;
-let resultLog=[], lastWord='';
-let stats = loadStats();
+  function stripTashkeel(s){ return (s||"").replace(/[\u064B-\u065F\u0670\u0640]/g,""); }
+  function normChar(c){ if(!c) return ""; if("اأإآٱ".indexOf(c)>-1) return "ا"; if(c==="ى")return "ي"; if(c==="ة")return "ه"; if(c==="ؤ")return "و"; if(c==="ئ")return "ي"; return c; }
+  // هل تبدأ الكلمة بالحرف المطلوب؟ (يقبل الحرف بعد "ال" التعريف)
+  function startsWithLetter(input, letter){ var s=stripTashkeel(input).trim(); if(!s) return false; var target=normChar(letter); var cands=[normChar(s.charAt(0))]; if(s.indexOf("ال")===0 && s.length>=3) cands.push(normChar(s.charAt(2))); for(var i=0;i<cands.length;i++){ if(cands[i]===target) return true; } return false; }
+  // هل الإدخال كلمة فعلية (حرفان على الأقل بعد تجاهل "ال") لا مجرد الحرف وحده؟
+  function isWord(input){ var s=stripTashkeel(input).trim(); if(!s) return false; var core=(s.indexOf("ال")===0)?s.slice(2):s; return core.replace(/\s+/g,"").length>=2; }
+  // الإجابة صحيحة إذا كتب الطفل كلمة (حرفان فأكثر) تبدأ بالحرف — بدون قاموس ولا تحقق من معنى الكلمة، لكن لا تُقبل كتابة الحرف وحده
+  function matches(input, letter){ return isWord(input) && startsWithLetter(input, letter); }
 
-function loadStats(){
-  const def={played:0,wins:0,streak:0,best:0,dist:[0,0,0,0,0,0]};
-  try{ return Object.assign(def, JSON.parse(localStorage.getItem('huroof_stats')||'{}')); }
-  catch{ return def; }
-}
-function saveStats(){ localStorage.setItem('huroof_stats',JSON.stringify(stats)); }
+  function mpCategoryState(elapsedSec, perCat, numCats){ if(elapsedSec<0) return {phase:"countin",index:-1,timeLeft:Math.max(1,Math.ceil(-elapsedSec))}; var total=perCat*numCats; if(elapsedSec>=total) return {phase:"done",index:numCats,timeLeft:0}; var index=Math.floor(elapsedSec/perCat); var timeLeft=Math.ceil(perCat-(elapsedSec-index*perCat)); return {phase:"play",index:index,timeLeft:Math.max(0,timeLeft)}; }
 
-// ── INIT ──
-function newGame(){
-  // اختيار كلمة جديدة مع تجنّب تكرار آخر كلمة مباشرة
-  do{ secret = WORDS[Math.floor(Math.random()*WORDS.length)]; }
-  while(WORDS.length>1 && secret===lastWord);
-  lastWord = secret;
-  gridData = Array.from({length:6},()=>Array(5).fill(''));
-  curRow=0; curCol=0; done=false; resultLog=[];
-  document.getElementById('end-overlay').classList.remove('open');
-  buildGrid();
-  buildKeyboard();
-  renderStats();
-}
-
-function buildGrid(){
-  const g=document.getElementById('grid');
-  g.innerHTML='';
-  for(let r=0;r<6;r++){
-    const row=document.createElement('div');
-    row.className='row'; row.id=`r${r}`;
-    for(let c=0;c<5;c++){
-      const t=document.createElement('div');
-      t.className='tile'; t.id=`t${r}${c}`;
-      row.appendChild(t);
+  var AC=null;
+  function ac(){ if(!AC){ try{ AC=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } return AC; }
+  function note(freq,start,dur,type,vol){ var c=ac(); if(!c) return; try{ var o=c.createOscillator(),g=c.createGain(); o.type=type||"sine"; o.frequency.value=freq; o.connect(g); g.connect(c.destination); var t=c.currentTime+start; g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(vol||.12,t+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t+dur); o.start(t); o.stop(t+dur+0.02); }catch(e){} }
+  function snd(name){ if(!S.sound) return; var c=ac(); if(c&&c.state==="suspended"){ try{ c.resume(); }catch(e){} }
+    switch(name){
+      case "pick": note(700,0,.09,"sine",.10); break;
+      case "good": [523,659,784,1047].forEach(function(f,i){ note(f,i*.06,.18,"triangle",.13); }); break;
+      case "star": note(1320,0,.12,"sine",.12); note(1760,.06,.14,"sine",.10); break;
+      case "tick": note(880,0,.06,"triangle",.06); break;
+      case "tickHot": note(1100,0,.07,"square",.08); break;
+      case "swoosh": note(500,0,.12,"sine",.09); note(720,.05,.1,"sine",.07); break;
+      case "timeup": note(330,0,.18,"sawtooth",.10); note(247,.12,.22,"sawtooth",.09); break;
+      case "count": note(600,0,.12,"square",.10); break;
+      case "go": [660,990,1320].forEach(function(f,i){ note(f,i*.05,.2,"triangle",.13); }); break;
+      case "join": note(880,0,.1,"sine",.11); note(1175,.08,.12,"sine",.09); break;
+      case "win": [523,659,784,1047,1319,1047,1319,1568].forEach(function(f,i){ note(f,i*.11,.26,"triangle",.14); }); break;
     }
-    g.appendChild(row);
   }
-}
+  var arVoice=null;
+  function loadVoices(){ try{ if(!("speechSynthesis" in window)) return; var vs=window.speechSynthesis.getVoices()||[]; arVoice=vs.filter(function(v){return /ar/i.test(v.lang);})[0]||null; }catch(e){} }
+  function speak(text){ if(!S.sound||!S.voice) return; try{ if(!("speechSynthesis" in window)) return; if(!arVoice) loadVoices(); var u=new SpeechSynthesisUtterance(text); u.lang="ar-SA"; u.rate=1.0; u.pitch=1.25; u.volume=1; if(arVoice) u.voice=arVoice; window.speechSynthesis.cancel(); window.speechSynthesis.speak(u); }catch(e){} }
 
-function buildKeyboard(){
-  const kb=document.getElementById('keyboard');
-  kb.innerHTML='';
-  KB_ROWS.forEach(letters=>{
-    const row=document.createElement('div');
-    row.className='kb-row';
-    letters.forEach(l=>{
-      const btn=document.createElement('button');
-      btn.className='key'+(l==='⌫'||l==='↵'?' action':'');
-      btn.textContent=l;
-      btn.id='k'+l;
-      btn.addEventListener('click',()=>handleKey(l));
-      row.appendChild(btn);
-    });
-    kb.appendChild(row);
-  });
-}
+  function buildAnimals(){ var box=$("animals"); box.innerHTML=""; ANIMALS.forEach(function(em){ var b=document.createElement("button"); b.className="animal"; b.type="button"; b.textContent=em; b.setAttribute("aria-label","شخصية"); b.onclick=function(){ S.animal=em; var n=box.querySelectorAll(".animal"); for(var i=0;i<n.length;i++) n[i].classList.remove("sel"); b.classList.add("sel"); snd("pick"); refreshStart(); }; box.appendChild(b); }); }
+  function refreshStart(){ var ok=S.name.trim().length>0 && !!S.animal; $("soloBtn").disabled=!ok; $("mpBtn").disabled=!ok; $("startHint").style.display=ok?"none":"block"; }
 
-// ── INPUT ──
-function handleKey(k){
-  if(done) return;
-  if(k==='⌫') deleteLetter();
-  else if(k==='↵') submitGuess();
-  else typeLetter(k);
-}
+  var LB_KEY="huroof_scores_v1";
+  function lbGet(){ try{ return JSON.parse(localStorage.getItem(LB_KEY)||"[]"); }catch(e){ return []; } }
+  function lbSave(e){ try{ var a=lbGet(); a.push(e); a.sort(function(x,y){return y.score-x.score;}); a=a.slice(0,10); localStorage.setItem(LB_KEY,JSON.stringify(a)); }catch(e){} }
+  function renderMiniLB(){ var a=lbGet(); var box=$("lbMini"); if(!a.length){ box.innerHTML=""; return; } var h='<div class="label">🏆 أبطال هذا الجهاز</div>'; a.slice(0,3).forEach(function(e,i){ h+='<div class="lb-row"><div class="rank">'+(i+1)+'</div><div class="em">'+(e.animal||"⭐")+'</div><div class="nm">'+escapeHtml(e.name)+'</div><div class="sc">'+e.score+'</div></div>'; }); box.innerHTML=h; }
 
-function typeLetter(l){
-  if(curCol>=5) return;
-  gridData[curRow][curCol]=l;
-  const t=document.getElementById(`t${curRow}${curCol}`);
-  t.textContent=l; t.classList.add('filled');
-  curCol++;
-}
+  var C=2*Math.PI*56;
+  function updateTimerUI(t,total){ total=total||S.perCat; var fg=$("ringFg"); fg.style.strokeDasharray=C; fg.style.strokeDashoffset=C*(1-Math.max(0,t)/total); var col="var(--green)"; if(t<=10) col="var(--coral)"; else if(t<=total*0.45) col="var(--yellow)"; fg.style.stroke=col; $("timerNum").textContent=Math.max(0,Math.ceil(t)); if(t<=10){ $("timerNum").classList.add("low"); } else { $("timerNum").classList.remove("low"); } }
+  function buildDotsAt(idx){ var d=$("dots"); d.innerHTML=""; for(var i=0;i<CATS.length;i++){ var s=document.createElement("div"); s.className="dot"+(i<idx?" done":(i===idx?" cur":"")); d.appendChild(s); } }
+  function setCategoryUI(i){ var cat=CATS[i]; $("catEmoji").textContent=cat.emoji; $("catName").textContent=cat.name; $("catLetter").textContent=S.letter; buildDotsAt(i); }
 
-function deleteLetter(){
-  if(curCol<=0) return;
-  curCol--;
-  gridData[curRow][curCol]='';
-  const t=document.getElementById(`t${curRow}${curCol}`);
-  t.textContent=''; t.classList.remove('filled');
-}
+  function startSolo(){ S.mode="solo"; S.letter=rand(LETTERS); S.idx=0; S.answers=[]; S.scores=[]; ac(); $("revealMascot").textContent=S.animal; $("revealLetter").textContent=S.letter; $("revealBubble").textContent=rand(CHEERS); show("screen-reveal"); snd("count"); setTimeout(function(){ snd("go"); },150); speak("حرف "+S.letter); }
+  function beginCategorySolo(){ $("playLetter").textContent=S.letter; $("playAnimal").textContent=S.animal; $("playName").textContent=S.name; setCategoryUI(S.idx); var inp=$("answer"); inp.value=""; inp.classList.remove("good"); $("live").textContent=""; $("live").className="live no"; $("mpNote").style.display="none"; $("playActions").style.display="block"; show("screen-play"); S.timeLeft=60; updateTimerUI(60,60); setTimeout(function(){ try{ inp.focus(); }catch(e){} },60); clearInterval(S.tid); S.tid=setInterval(function(){ S.timeLeft--; updateTimerUI(S.timeLeft,60); if(S.timeLeft<=10&&S.timeLeft>0) snd(S.timeLeft<=3?"tickHot":"tick"); if(S.timeLeft<=0){ clearInterval(S.tid); snd("timeup"); endCategorySolo(true); } },1000); }
+  function endCategorySolo(timedOut){ clearInterval(S.tid); var ans=$("answer").value.trim(); var ok=matches(ans,S.letter); S.answers[S.idx]=ans; S.scores[S.idx]=ok?10:0; var last=(S.idx>=CATS.length-1); var em,msg; if(ok){ em="⭐"; msg="أحسنت! +١٠"; snd("good"); speak(rand(VOICE_GOOD)); } else if(!ans){ em=timedOut?"⏰":"➡️"; msg="انتهى الوقت"; } else { em="🙂"; msg="محاولة حلوة"; } showSplash(em,msg,function(){ if(last){ showResultsSolo(); } else { S.idx++; snd("swoosh"); beginCategorySolo(); } }); }
+  function showResultsSolo(){ clearInterval(S.tid); var total=0,stars=0; for(var i=0;i<CATS.length;i++){ total+=(S.scores[i]||0); if(S.scores[i]) stars++; } $("soloResults").style.display="block"; $("mpResults").style.display="none"; $("resMascot").textContent=S.animal; var title=stars>=6?"بطل خارق! 🎉":(stars>=4?"ممتاز جداً!":(stars>=2?"أحسنت!":"محاولة حلوة!")); $("resTitle").textContent=title; renderStars(stars); $("resScore").textContent="النقاط: "+total+" من 60"; var rv=$("review"); rv.innerHTML=""; CATS.forEach(function(cat,i){ var ans=S.answers[i]||"—",ok=!!S.scores[i]; var row=document.createElement("div"); row.className="rev-row"; row.innerHTML='<div class="ce">'+cat.emoji+'</div><div class="rc"><div class="ct">'+cat.name+'</div><div class="ans">'+escapeHtml(ans)+'</div></div><div class="mark">'+(ok?"✅":"⬜")+'</div>'; rv.appendChild(row); }); lbSave({name:S.name,animal:S.animal,score:total,date:Date.now()}); show("screen-results"); snd("win"); confettiBurst(); if(stars>=4) speak("أحسنت يا "+S.name); }
+  function renderStars(stars){ var st=$("resStars"); st.innerHTML=""; for(var j=0;j<6;j++){ var sp=document.createElement("span"); sp.className="star"+(j<stars?"":" off"); sp.textContent="⭐"; sp.style.animationDelay=(j*0.08)+"s"; st.appendChild(sp); } }
+  function showSplash(em,msg,done){ var sp=$("splash"); $("splashEm").textContent=em; $("splashMsg").textContent=msg; sp.classList.add("show"); setTimeout(function(){ sp.classList.remove("show"); done&&done(); },850); }
 
-// ── GUESS LOGIC ──
-function submitGuess(){
-  if(curCol<5){shakeRow(curRow);toast('الكلمة ناقصة!');return;}
-  const guess=gridData[curRow].join('');
-  const result=checkGuess(guess,secret);
-  resultLog.push(result);
-  revealRow(curRow,result,()=>{
-    updateKeyboard(guess,result);
-    const won=result.every(r=>r==='correct');
-    const rowFinished=curRow;
-    curRow++; curCol=0;
-    if(won){
-      done=true;
-      const tries=rowFinished+1;
-      stats.played++; stats.wins++; stats.streak++;
-      if(stats.streak>stats.best) stats.best=stats.streak;
-      stats.dist[tries-1]++;
-      saveStats();
-      for(let c=0;c<5;c++){
-        setTimeout(()=>document.getElementById(`t${rowFinished}${c}`).classList.add('bounce'),c*80+200);
-      }
-      setTimeout(()=>showEnd(true,tries),900);
-    } else if(curRow>=6){
-      done=true;
-      stats.played++; stats.streak=0;
-      saveStats();
-      setTimeout(()=>showEnd(false,6),500);
+  // ---------- MULTIPLAYER ----------
+  var fb={ready:false,db:null,roomRef:null,unsubRoom:null,unsubPlayers:null};
+  function fbConfigured(){ return FIREBASE_CONFIG && FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.apiKey.indexOf("PASTE_")===-1; }
+  function initFirebase(){ if(fb.ready) return true; try{ if(typeof firebase==="undefined") return false; if(!fbConfigured()) return false; firebase.initializeApp(FIREBASE_CONFIG); fb.db=firebase.firestore(); fb.ready=true; return true; }catch(e){ return false; } }
+  function playerId(){ if(!S.playerId){ S.playerId="p_"+Math.random().toString(36).slice(2,9); } return S.playerId; }
+  function gen4(){ return String(Math.floor(1000+Math.random()*9000)); }
+
+  function openLobby(){
+    if(typeof firebase==="undefined" || !fbConfigured()){
+      show("screen-lobby"); $("lobbyChoose").style.display="block"; $("lobbyRoom").style.display="none";
+      $("lobbyError").innerHTML="⚙️ وضع التحدي يحتاج إعداد Firebase أول مرة (خطوة لمرة واحدة). تقدر تلعب «لحالك» الآن، ونفعّل التحدي بعد الإعداد.";
+      return;
     }
-    renderStats();
-  });
-}
-
-function checkGuess(guess,secret){
-  const g=[...guess], s=[...secret];
-  const res=Array(5).fill('absent');
-  // Pass 1: exact
-  for(let i=0;i<5;i++){
-    if(norm(g[i])===norm(s[i])){res[i]='correct';s[i]=null;g[i]=null;}
+    initFirebase(); show("screen-lobby"); $("lobbyChoose").style.display="block"; $("lobbyRoom").style.display="none"; $("lobbyError").textContent=""; $("joinCodeInput").value="";
   }
-  // Pass 2: present
-  for(let i=0;i<5;i++){
-    if(g[i]===null) continue;
-    const j=s.findIndex(c=>c!==null&&norm(c)===norm(g[i]));
-    if(j!==-1){res[i]='present';s[j]=null;}
+  function attachRoomListeners(){ detachRoomListeners(); fb.unsubRoom=fb.roomRef.onSnapshot(onRoomSnap,function(){}); fb.unsubPlayers=fb.roomRef.collection("players").onSnapshot(onPlayersSnap,function(){}); }
+  function detachRoomListeners(){ if(fb.unsubRoom){ fb.unsubRoom(); fb.unsubRoom=null; } if(fb.unsubPlayers){ fb.unsubPlayers(); fb.unsubPlayers=null; } }
+
+  function createRoom(){
+    if(!initFirebase()){ $("lobbyError").textContent="تعذّر الاتصال — تأكد من إعداد Firebase والإنترنت."; return; }
+    $("lobbyError").textContent=""; var code=gen4(); var ref=fb.db.collection("rooms").doc(code);
+    ref.get().then(function(doc){
+      if(doc.exists){ return createRoom(); }
+      S.isHost=true; S.roomCode=code; fb.roomRef=ref;
+      return ref.set({host:playerId(),status:"lobby",round:0,perCat:60,letter:"",startedAt:0,createdAt:firebase.firestore.FieldValue.serverTimestamp()})
+        .then(function(){ return ref.collection("players").doc(playerId()).set({name:S.name,animal:S.animal,score:0,stars:0,done:false,joinedAt:firebase.firestore.FieldValue.serverTimestamp()}); })
+        .then(function(){ enterRoomUI(); attachRoomListeners(); });
+    }).catch(function(){ $("lobbyError").textContent="صار خطأ أثناء إنشاء الغرفة، حاول مرة ثانية."; });
   }
-  return res;
-}
-
-// ── REVEAL ANIMATION ──
-function revealRow(row,result,cb){
-  for(let c=0;c<5;c++){
-    const t=document.getElementById(`t${row}${c}`);
-    const cls=result[c];
-    setTimeout(()=>{
-      t.classList.add('flip');
-      setTimeout(()=>{t.classList.remove('flip');t.classList.add(cls);},220);
-      if(c===4) setTimeout(cb,400);
-    },c*110);
+  function joinRoom(){
+    var code=($("joinCodeInput").value||"").trim();
+    if(!/^\d{4}$/.test(code)){ $("lobbyError").textContent="اكتب رمز صحيح مكوّن من ٤ أرقام."; return; }
+    if(!initFirebase()){ $("lobbyError").textContent="تعذّر الاتصال — تأكد من إعداد Firebase والإنترنت."; return; }
+    $("lobbyError").textContent=""; var ref=fb.db.collection("rooms").doc(code);
+    ref.get().then(function(doc){
+      if(!doc.exists){ $("lobbyError").textContent="ما لقينا غرفة بهالرمز 🔍 تأكد من الرقم."; return; }
+      var data=doc.data(); S.isHost=(data.host===playerId()); S.roomCode=code; fb.roomRef=ref;
+      return ref.collection("players").doc(playerId()).set({name:S.name,animal:S.animal,score:0,stars:0,done:false,joinedAt:firebase.firestore.FieldValue.serverTimestamp()})
+        .then(function(){ enterRoomUI(); attachRoomListeners(); });
+    }).catch(function(){ $("lobbyError").textContent="صار خطأ أثناء الدخول، حاول مرة ثانية."; });
   }
-}
+  function enterRoomUI(){ $("lobbyChoose").style.display="none"; $("lobbyRoom").style.display="block"; $("roomCodeBig").textContent=S.roomCode; $("hostControls").style.display=S.isHost?"block":"none"; $("joinWaitNote").style.display=S.isHost?"none":"block"; $("roomError").textContent=""; }
 
-function shakeRow(row){
-  const r=document.getElementById(`r${row}`);
-  r.classList.add('shake');
-  setTimeout(()=>r.classList.remove('shake'),500);
-}
+  function onPlayersSnap(snap){ var arr=[]; snap.forEach(function(d){ var v=d.data(); v._id=d.id; arr.push(v); }); var prev=S.players.length; S.players=arr; if(S.isHost && isActive("screen-lobby") && arr.length>prev && prev>0){ snd("join"); } if(isActive("screen-lobby")) renderPlayersList(); if(isActive("screen-results") && S.mode==="mp") renderMpLeaderboard(); }
+  function renderPlayersList(){ var box=$("playersList"); var arr=S.players; $("playersCount").textContent="("+arr.length+")"; var h=""; arr.forEach(function(p){ var me=p._id===playerId(); h+='<div class="lb-row'+(me?" me":"")+'"><div class="em">'+(p.animal||"🙂")+'</div><div class="nm">'+escapeHtml(p.name)+(me?" (أنت)":"")+'</div></div>'; }); box.innerHTML=h||'<div class="hint">في انتظار اللاعبين…</div>'; if(S.isHost){ $("startChallengeBtn").disabled=arr.length<1; } }
+  function startChallenge(){ if(!fb.roomRef) return; var letter=rand(LETTERS); fb.roomRef.update({letter:letter,perCat:S.perCat,startedAt:Date.now()+3000,status:"playing",round:firebase.firestore.FieldValue.increment(1)}).catch(function(){ $("roomError").textContent="تعذّر بدء التحدي، حاول مرة ثانية."; }); }
 
-// ── KEYBOARD COLORS ──
-const KP={correct:3,present:2,absent:1};
-function updateKeyboard(guess,result){
-  [...guess].forEach((l,i)=>{
-    // Try both the actual letter and the key label (أ maps to ا etc.)
-    const ids=['k'+l];
-    if(/[أإآ]/.test(l)) ids.push('kا');
-    ids.forEach(id=>{
-      const btn=document.getElementById(id);
-      if(!btn) return;
-      const cur=btn.dataset.s||'';
-      if(!cur||(KP[result[i]]||0)>(KP[cur]||0)){
-        btn.dataset.s=result[i];
-        btn.className='key'+(btn.classList.contains('action')?' action':'')+' '+result[i];
-      }
+  function onRoomSnap(doc){ if(!doc.exists){ return; } var d=doc.data();
+    if(d.status==="lobby"){ if(isActive("screen-play")||isActive("screen-countin")||isActive("screen-results")){ enterRoomUI(); show("screen-lobby"); } return; }
+    if(d.status==="playing"){ if(d.round!==S.mpRound){ S.mpRound=d.round; S.letter=d.letter; S.perCat=d.perCat||60; S.startedAt=d.startedAt; runMP(); } }
+  }
+  function runMP(){
+    var token=++S.mpRunToken; S.mode="mp"; S.answers=[]; S.mpCurIdx=-1; S.mpLastCount=null;
+    if(fb.roomRef){ fb.roomRef.collection("players").doc(playerId()).update({score:0,stars:0,done:false}).catch(function(){}); }
+    $("playLetter").textContent=S.letter; $("playAnimal").textContent=S.animal; $("playName").textContent=S.name; $("countLetterHint").textContent=S.letter;
+    $("mpNote").style.display="block"; $("playActions").style.display="none";
+    clearInterval(S.mpInterval);
+    S.mpInterval=setInterval(function(){
+      if(token!==S.mpRunToken){ clearInterval(S.mpInterval); return; }
+      var elapsed=(Date.now()-S.startedAt)/1000; var st=mpCategoryState(elapsed,S.perCat,CATS.length);
+      if(st.phase==="countin"){ showCountIn(st.timeLeft); }
+      else if(st.phase==="play"){ if(S.mpCurIdx!==st.index){ onMpCategoryChange(st.index); } if(!isActive("screen-play")) show("screen-play"); updateTimerUI(st.timeLeft,S.perCat); }
+      else { clearInterval(S.mpInterval); finalizeMP(); }
+    },150);
+  }
+  function showCountIn(n){ if(!isActive("screen-countin")) show("screen-countin"); if(S.mpLastCount!==n){ S.mpLastCount=n; var el=$("countNum"); el.textContent=n; el.style.animation="none"; void el.offsetWidth; el.style.animation=""; snd("count"); speak(String(n)); } }
+  function onMpCategoryChange(newIdx){ if(S.mpCurIdx>=0){ var prev=(S.answers[S.mpCurIdx]||"").trim(); if(matches(prev,S.letter)){ snd("star"); floatChip("+10 ⭐"); } } if(newIdx===0){ snd("go"); speak("حرف "+S.letter); } S.mpCurIdx=newIdx; setCategoryUI(newIdx); var inp=$("answer"); inp.value=""; inp.classList.remove("good"); $("live").textContent=""; $("live").className="live no"; if(newIdx>0) snd("swoosh"); setTimeout(function(){ try{ inp.focus(); }catch(e){} },50); }
+  function finalizeMP(){ var total=0,stars=0; for(var i=0;i<CATS.length;i++){ if(matches((S.answers[i]||""),S.letter)){ total+=10; stars++; } } if(fb.roomRef){ fb.roomRef.collection("players").doc(playerId()).update({score:total,stars:stars,done:true}).catch(function(){}); } showResultsMP(total,stars); }
+  function showResultsMP(total,stars){ $("soloResults").style.display="none"; $("mpResults").style.display="block"; $("resMascot").textContent=S.animal; $("resTitle").textContent="خلصت! 🏁"; renderStars(stars); $("resScore").textContent="نقاطك: "+total+" من 60"; show("screen-results"); snd("win"); confettiBurst(); renderMpLeaderboard(); $("newRoundBtn").style.display=S.isHost?"block":"none"; $("waitHostNote").style.display=S.isHost?"none":"block"; }
+  function renderMpLeaderboard(){ var arr=S.players.slice().sort(function(a,b){ return (b.score||0)-(a.score||0) || (b.stars||0)-(a.stars||0); }); var allDone=arr.length>0 && arr.every(function(p){ return p.done; }); var medals=["🥇","🥈","🥉"]; var h=""; arr.forEach(function(p,i){ var me=p._id===playerId(); var rankDisp=(p.done&&i<3)?medals[i]:(i+1); var stat=p.done?((p.stars||0)+" ⭐"):"يلعب…"; h+='<div class="lb-row'+(me?" me":"")+(allDone&&i===0?" win":"")+'"><div class="rank">'+rankDisp+'</div><div class="em">'+(p.animal||"🙂")+'</div><div class="nm">'+escapeHtml(p.name)+(me?" (أنت)":"")+'</div><div style="text-align:left;"><div class="sc">'+(p.score||0)+'</div><div class="stat">'+stat+'</div></div></div>'; }); $("mpLeaderboard").innerHTML=h||'<div class="hint">في انتظار النتائج…</div>'; if(allDone&&S.isHost){ var top=arr[0]; if(top && !$("mpLeaderboard").dataset.announced){ $("mpLeaderboard").dataset.announced="1"; speak("الفائز "+top.name); } } }
+  function newRound(){ if($("mpLeaderboard")) delete $("mpLeaderboard").dataset.announced; startChallenge(); }
+  function leaveRoom(){ try{ if(fb.roomRef){ fb.roomRef.collection("players").doc(playerId()).delete().catch(function(){}); } }catch(e){} detachRoomListeners(); fb.roomRef=null; S.roomCode=""; S.isHost=false; S.mpRound=-1; S.mode="solo"; clearInterval(S.mpInterval); if($("mpLeaderboard")) delete $("mpLeaderboard").dataset.announced; show("screen-start"); renderMiniLB(); }
+
+  function floatChip(text){ var c=document.createElement("div"); c.className="chip"; c.textContent=text; document.body.appendChild(c); setTimeout(function(){ if(c.parentNode) c.parentNode.removeChild(c); },1000); }
+  function confettiBurst(){ if(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return; var cv=$("confetti"),ctx=cv.getContext("2d"); var W=cv.width=window.innerWidth,H=cv.height=window.innerHeight; cv.style.display="block"; var cols=["#19B36B","#FFC83D","#FF6B6B","#3DA5FF","#9B5DE5"]; var P=[]; for(var i=0;i<140;i++){ P.push({x:W/2+(Math.random()-.5)*120,y:H*0.32,vx:(Math.random()-.5)*9,vy:Math.random()*-12-4,s:Math.random()*8+5,c:cols[i%cols.length],r:Math.random()*6,vr:(Math.random()-.5)*0.4}); } var t0=Date.now(); function frame(){ var el=Date.now()-t0; ctx.clearRect(0,0,W,H); for(var i=0;i<P.length;i++){ var p=P[i]; p.vy+=0.45; p.x+=p.vx; p.y+=p.vy; p.r+=p.vr; ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.r); ctx.globalAlpha=Math.max(0,1-el/2600); ctx.fillStyle=p.c; ctx.fillRect(-p.s/2,-p.s/2,p.s,p.s*0.6); ctx.restore(); } if(el<2600){ requestAnimationFrame(frame); } else { ctx.clearRect(0,0,W,H); cv.style.display="none"; } } requestAnimationFrame(frame); }
+
+  function init(){
+    buildAnimals(); renderMiniLB(); loadVoices();
+    if("speechSynthesis" in window){ try{ window.speechSynthesis.onvoiceschanged=loadVoices; }catch(e){} }
+    $("nameInput").addEventListener("input",function(e){ S.name=e.target.value; refreshStart(); });
+    $("soloBtn").addEventListener("click",function(){ ac(); startSolo(); });
+    $("mpBtn").addEventListener("click",function(){ ac(); openLobby(); });
+    $("goBtn").addEventListener("click",function(){ beginCategorySolo(); });
+    $("answer").addEventListener("input",function(e){
+      var val=e.target.value;
+      if(S.mode==="mp" && S.mpCurIdx>=0){ S.answers[S.mpCurIdx]=val; }
+      var ok=matches(val,S.letter); var inp=e.target,live=$("live");
+      if(val.trim()===""){ inp.classList.remove("good"); live.textContent=""; live.className="live no"; return; }
+      if(ok){ if(!inp.classList.contains("good")) snd("good"); inp.classList.add("good"); live.textContent="👍 تمام! تبدأ بحرف "+S.letter; live.className="live ok"; }
+      else if(startsWithLetter(val,S.letter)){ inp.classList.remove("good"); live.textContent="اكتب كلمة كاملة تبدأ بحرف "+S.letter; live.className="live no"; }
+      else { inp.classList.remove("good"); live.textContent="لازم تبدأ بحرف "+S.letter; live.className="live no"; }
     });
-  });
-}
-
-// ── UI HELPERS ──
-let _toastT;
-function toast(msg,dur=1600){
-  const el=document.getElementById('toast');
-  el.textContent=msg; el.classList.add('show');
-  clearTimeout(_toastT);
-  _toastT=setTimeout(()=>el.classList.remove('show'),dur);
-}
-
-function renderStats(){
-  document.getElementById('s-played').textContent=stats.played;
-  document.getElementById('s-wins').textContent=stats.wins;
-  document.getElementById('s-streak').textContent=stats.streak;
-}
-
-function showEnd(won,tries){
-  document.getElementById('end-emoji').textContent=won?'🎉':'😔';
-  document.getElementById('end-title').textContent=won?'أحسنت! 🏆':'للأسف!';
-  document.getElementById('end-msg').innerHTML=won
-    ?`وجدت الكلمة في <b>${tries}</b> محاولة`
-    :`الكلمة كانت: <b>${secret}</b>`;
-  renderEndStats(won?tries:0);
-  document.getElementById('end-overlay').classList.add('open');
-}
-
-function renderEndStats(lastTries){
-  const pct = stats.played? Math.round(stats.wins/stats.played*100):0;
-  document.getElementById('es-played').textContent=stats.played;
-  document.getElementById('es-pct').textContent=pct+'%';
-  document.getElementById('es-streak').textContent=stats.streak;
-  document.getElementById('es-best').textContent=stats.best;
-  // توزيع المحاولات
-  const max=Math.max(1,...stats.dist);
-  const wrap=document.getElementById('dist-wrap');
-  wrap.innerHTML='';
-  stats.dist.forEach((n,i)=>{
-    const row=document.createElement('div');
-    row.className='dist-row';
-    const w=Math.max(8,Math.round(n/max*100));
-    const hot=(i+1)===lastTries?' dist-hot':'';
-    row.innerHTML=`<span class="dist-label">${i+1}</span>`+
-      `<div class="dist-bar${hot}" style="width:${w}%">${n}</div>`;
-    wrap.appendChild(row);
-  });
-}
-
-// ── SHARE ──
-function shareResult(){
-  const map={correct:'🟩',present:'🟨',absent:'⬜'};
-  const lines=resultLog.map(row=>row.map(r=>map[r]).join('')).join('\n');
-  const total=resultLog.length;
-  const won=resultLog[total-1]?.every(r=>r==='correct');
-  const text=`حروف ${won?total:'-'}/6\n${lines}`;
-  if(navigator.clipboard){
-    navigator.clipboard.writeText(text).then(()=>toast('تم النسخ! 📋'));
-  } else {
-    const ta=document.createElement('textarea');
-    ta.value=text; document.body.appendChild(ta);
-    ta.select(); document.execCommand('copy');
-    document.body.removeChild(ta);
-    toast('تم النسخ! 📋');
+    $("answer").addEventListener("keydown",function(e){ if(e.key==="Enter" && S.mode==="solo"){ e.preventDefault(); endCategorySolo(false); } });
+    $("nextBtn").addEventListener("click",function(){ if(S.mode==="solo") endCategorySolo(false); });
+    $("againBtn").addEventListener("click",function(){ startSolo(); });
+    $("newBtn").addEventListener("click",function(){ $("nameInput").value=S.name; renderMiniLB(); show("screen-start"); });
+    $("lobbyBackBtn").addEventListener("click",function(){ leaveRoom(); });
+    $("createRoomBtn").addEventListener("click",createRoom);
+    $("joinRoomBtn").addEventListener("click",joinRoom);
+    $("leaveRoomBtn").addEventListener("click",leaveRoom);
+    $("leaveRoomBtn2").addEventListener("click",leaveRoom);
+    $("startChallengeBtn").addEventListener("click",startChallenge);
+    $("newRoundBtn").addEventListener("click",newRound);
+    var seg=$("timeSeg"); seg.querySelectorAll("button").forEach(function(b){ b.addEventListener("click",function(){ seg.querySelectorAll("button").forEach(function(x){x.classList.remove("on");}); b.classList.add("on"); S.perCat=parseInt(b.dataset.sec,10); snd("pick"); }); });
+    $("soundBtn").addEventListener("click",function(){ S.sound=!S.sound; this.textContent=S.sound?"🔊":"🔇"; this.classList.toggle("off",!S.sound); if(S.sound) snd("pick"); });
+    $("voiceBtn").addEventListener("click",function(){ S.voice=!S.voice; this.classList.toggle("off",!S.voice); if(S.voice&&S.sound) speak("يلا نلعب"); });
+    $("helpBtn").addEventListener("click",function(){ $("rulesBody").classList.toggle("open"); });
   }
-}
-
-// ── HELP MODAL ──
-function openHelp(){document.getElementById('help-overlay').classList.add('open')}
-function closeHelp(){document.getElementById('help-overlay').classList.remove('open')}
-
-// ── PHYSICAL KEYBOARD ──
-document.addEventListener('keydown',e=>{
-  if(e.ctrlKey||e.metaKey||e.altKey) return;
-  if(e.key==='Backspace') handleKey('⌫');
-  else if(e.key==='Enter') handleKey('↵');
-  // Arabic letters from physical keyboard
-  else if([...e.key].length===1){
-    const valid=[
-      'ض','ص','ث','ق','ف','غ','ع','ه','خ','ح','ج',
-      'ش','س','ي','ب','ل','ا','ت','ن','م','ك','ط',
-      'ذ','ئ','ء','ؤ','ر','ى','ة','و','ز','ظ','د',
-      'أ','إ','آ'
-    ];
-    if(valid.includes(e.key)) handleKey(e.key);
-  }
-});
-
-// ── START ──
-newGame();
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
+  window.__HUROOF__={matches:matches,startsWithLetter:startsWithLetter,isWord:isWord,normChar:normChar,mpCategoryState:mpCategoryState,LETTERS:LETTERS,CATS:CATS};
+  if("serviceWorker" in navigator){ window.addEventListener("load",function(){ navigator.serviceWorker.register("sw.js").catch(function(){}); }); }
+})();
 </script>
 </body>
 </html>

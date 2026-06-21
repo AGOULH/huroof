@@ -1,0 +1,22 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#19B36B"/>
+      <stop offset="1" stop-color="#3DA5FF"/>
+    </linearGradient>
+  </defs>
+  <!-- background (maskable safe) -->
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <!-- soft highlight -->
+  <ellipse cx="170" cy="150" rx="200" ry="120" fill="#ffffff" opacity="0.12"/>
+  <!-- decorative stars -->
+  <path d="M120 110 l11 24 26 3 -19 18 5 26 -23 -13 -23 13 5 -26 -19 -18 26 -3z" fill="#FFC83D"/>
+  <circle cx="400" cy="135" r="12" fill="#FFC83D"/>
+  <circle cx="430" cy="380" r="10" fill="#FF6B6B"/>
+  <!-- Arabic alef (font-independent) -->
+  <rect x="224" y="170" width="64" height="210" rx="32" fill="#ffffff"/>
+  <!-- hamza -->
+  <path d="M300 150 q26 4 26 26 q0 18 -20 22 q14 -8 6 -22 q-6 -12 -22 -8 q4 -16 10 -18z" fill="#ffffff"/>
+  <!-- base seat -->
+  <rect x="196" y="372" width="120" height="22" rx="11" fill="#ffffff" opacity="0.9"/>
+</svg>
