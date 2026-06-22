@@ -412,8 +412,44 @@
   function startsWithLetter(input, letter){ var s=stripTashkeel(input).trim(); if(!s) return false; var target=normChar(letter); var cands=[normChar(s.charAt(0))]; if(s.indexOf("ال")===0 && s.length>=3) cands.push(normChar(s.charAt(2))); for(var i=0;i<cands.length;i++){ if(cands[i]===target) return true; } return false; }
   // هل الإدخال كلمة فعلية (حرفان على الأقل بعد تجاهل "ال") لا مجرد الحرف وحده؟
   function isWord(input){ var s=stripTashkeel(input).trim(); if(!s) return false; var core=(s.indexOf("ال")===0)?s.slice(2):s; return core.replace(/\s+/g,"").length>=2; }
-  // الإجابة صحيحة إذا كتب الطفل كلمة (حرفان فأكثر) تبدأ بالحرف — بدون قاموس ولا تحقق من معنى الكلمة، لكن لا تُقبل كتابة الحرف وحده
-  function matches(input, letter){ return isWord(input) && startsWithLetter(input, letter); }
+  // قوائم كلمات مدمجة (بدون إنترنت) للفئات الواقعية — تُحصر فيها الإجابة. الأسماء والجماد متساهلة (أي كلمة حقيقية)
+  var WORD_LISTS={
+    country:["ألمانيا","أمريكا","أستراليا","أوكرانيا","الأردن","الإمارات","أفغانستان","أوغندا","إثيوبيا","إيطاليا","إسبانيا","إيران","إندونيسيا","الأرجنتين","أنغولا","أذربيجان","أرمينيا","أوزبكستان","الإكوادور","ألبانيا",
+      "البحرين","بريطانيا","البرازيل","بلجيكا","بولندا","باكستان","بنغلاديش","بنما","بوليفيا","بوتان","بروناي","بلغاريا","البرتغال","بوروندي",
+      "تونس","تركيا","تشاد","تنزانيا","تايلاند","تركمانستان","توغو","تايوان",
+      "جامايكا","جورجيا","جيبوتي","الدنمارك","دومينيكا","روسيا","رواندا","رومانيا","زامبيا","زيمبابوي",
+      "السعودية","سوريا","السودان","سنغافورة","السنغال","سلوفاكيا","سلوفينيا","سريلانكا","سويسرا","السويد","سيراليون","سورينام","ساموا","سيشل",
+      "الصومال","الصين","عمان","العراق",
+      "فرنسا","فلسطين","فنلندا","الفلبين","فنزويلا","فيتنام","فيجي","قطر","قبرص","قيرغيزستان",
+      "الكويت","كندا","كوريا","كينيا","كولومبيا","كوبا","الكاميرون","كازاخستان","كرواتيا","كمبوديا","كوستاريكا","الكونغو",
+      "لبنان","ليبيا","لوكسمبورغ","ليتوانيا","لاتفيا","ليبيريا","ليسوتو","لاوس",
+      "مصر","المغرب","ماليزيا","المكسيك","مالطا","موريتانيا","مدغشقر","مالي","مولدوفا","موناكو","منغوليا","ميانمار","موزمبيق","مالاوي","المالديف",
+      "النرويج","نيجيريا","نيوزيلندا","نيبال","ناميبيا","نيكاراغوا","النيجر","النمسا","هولندا","الهند","هنغاريا","هايتي","هندوراس","اليمن","اليونان","اليابان"],
+    animal:["أسد","أرنب","أفعى","أيل","أخطبوط","إوزة",
+      "بقرة","بقر","بطة","بط","بطريق","بومة","ببغاء","بغل","بعوضة","بلبل","بجعة",
+      "تمساح","تيس","جمل","جدي","جاموس","جرذ","جراد","جربوع",
+      "حصان","حمار","حوت","حمامة","حمام","حية","حلزون","حرباء","حمل","خروف","خنزير","خفاش","خيل",
+      "ديك","دجاجة","دجاج","دب","دلفين","دودة","دبور","رنة","راكون","زرافة","زنبور",
+      "سمكة","سمك","سلحفاة","سنجاب","سرطان","سحلية","سلمون","شاة","صقر","صرصور","طاووس","طائر","طير",
+      "عصفور","عنكبوت","عقرب","عجل","عنزة","عندليب","فيل","فأر","فراشة","فهد","فرس","فقمة",
+      "قط","قطة","قرد","قنفذ","قنديل","كلب","كنغر","كتكوت","كركدن","كوبرا","كروان",
+      "ليث","لقلق","لبؤة","ماعز","ماموث","نمر","نملة","نمل","نحلة","نحل","نعامة","نعام","نسر","ناقة",
+      "هدهد","هرة","وعل","وطواط","وزة","يمامة","يربوع"],
+    food:["أرز","أناناس","بطاطس","بطاطا","برتقال","بيض","بصل","باذنجان","بازلاء","برغل","بسكويت","بقدونس","بامية",
+      "تفاح","تمر","توت","تين","جبن","جزر","جوافة","جوز","حليب","حلوى","حمص","حبوب","خبز","خيار","خس","خوخ",
+      "دجاج","دقيق","دبس","رمان","رغيف","رز","زيتون","زبادي","زبدة","زنجبيل",
+      "سمك","سكر","سبانخ","سلطة","سميد","سفرجل","شاي","شوربة","شعير","شطيرة","شوكولاتة","شمام","صنوبر","صلصة","طماطم","طحين",
+      "عسل","عنب","عدس","عصير","فول","فلفل","فراولة","فطر","فستق","فشار","فاصوليا","قمح","قرنبيط","قشطة","قهوة","قرفة",
+      "كباب","كعك","كيك","كرز","كمثرى","كوسة","كرفس","كستناء","لحم","ليمون","لبن","لوز","لفت",
+      "موز","ملح","مشمش","مانجو","مكرونة","ملوخية","نعناع","نشا","نقانق","هريسة","هيل","يقطين","يانسون"]
+  };
+  // تطبيع كلمة كاملة للمقارنة: تشكيل + أشكال الألف/الياء/التاء + إزالة الهمزة المفردة + تجاهل "ال"
+  function normWord(s){ s=stripTashkeel(s||"").trim(); var out=""; for(var i=0;i<s.length;i++){ out+=normChar(s.charAt(i)); } out=out.replace(/[ءّ]/g,"").replace(/\s+/g," ").trim(); if(out.indexOf("ال")===0 && out.length>3) out=out.slice(2); return out; }
+  var WL_SET=(function(){ var m={}; for(var k in WORD_LISTS){ if(!WORD_LISTS.hasOwnProperty(k)) continue; var s={}; WORD_LISTS[k].forEach(function(w){ s[normWord(w)]=1; }); m[k]=s; } return m; })();
+  function inList(catKey,input){ var s=WL_SET[catKey]; return !!(s && s[normWord(input)]); }
+  function isListedCat(catKey){ return catKey==="animal"||catKey==="food"||catKey==="country"; }
+  // الإجابة صحيحة: تبدأ بالحرف، + (للفئات الواقعية) ضمن القائمة، أو (للأسماء/الجماد) كلمة حقيقية من حرفين فأكثر
+  function matches(input, letter, catKey){ if(!startsWithLetter(input, letter)) return false; if(isListedCat(catKey)) return inList(catKey, input); return isWord(input); }
 
   function mpCategoryState(elapsedSec, perCat, numCats){ if(elapsedSec<0) return {phase:"countin",index:-1,timeLeft:Math.max(1,Math.ceil(-elapsedSec))}; var total=perCat*numCats; if(elapsedSec>=total) return {phase:"done",index:numCats,timeLeft:0}; var index=Math.floor(elapsedSec/perCat); var timeLeft=Math.ceil(perCat-(elapsedSec-index*perCat)); return {phase:"play",index:index,timeLeft:Math.max(0,timeLeft)}; }
 
@@ -458,7 +494,7 @@
 
   function startSolo(){ S.mode="solo"; S.letter=rand(LETTERS); S.idx=0; S.answers=[]; S.scores=[]; ac(); $("revealMascot").textContent=S.animal; $("revealLetter").textContent=S.letter; $("revealBubble").textContent=rand(CHEERS); show("screen-reveal"); snd("count"); setTimeout(function(){ snd("go"); },150); speak("حرف "+letterName(S.letter)); }
   function beginCategorySolo(){ $("playLetter").textContent=S.letter; $("playAnimal").textContent=S.animal; $("playName").textContent=S.name; setCategoryUI(S.idx); var inp=$("answer"); inp.value=""; inp.classList.remove("good"); $("live").textContent=""; $("live").className="live no"; $("mpNote").style.display="none"; $("playActions").style.display="block"; show("screen-play"); S.timeLeft=60; updateTimerUI(60,60); setTimeout(function(){ try{ inp.focus(); }catch(e){} },60); clearInterval(S.tid); S.tid=setInterval(function(){ S.timeLeft--; updateTimerUI(S.timeLeft,60); if(S.timeLeft<=10&&S.timeLeft>0) snd(S.timeLeft<=3?"tickHot":"tick"); if(S.timeLeft<=0){ clearInterval(S.tid); snd("timeup"); endCategorySolo(true); } },1000); }
-  function endCategorySolo(timedOut){ clearInterval(S.tid); var ans=$("answer").value.trim(); var ok=matches(ans,S.letter); S.answers[S.idx]=ans; S.scores[S.idx]=ok?10:0; var last=(S.idx>=CATS.length-1); var em,msg; if(ok){ em="⭐"; msg="أحسنت! +١٠"; snd("good"); speak(rand(VOICE_GOOD)); } else if(!ans){ em=timedOut?"⏰":"➡️"; msg="انتهى الوقت"; } else { em="🙂"; msg="محاولة حلوة"; } showSplash(em,msg,function(){ if(last){ showResultsSolo(); } else { S.idx++; snd("swoosh"); beginCategorySolo(); } }); }
+  function endCategorySolo(timedOut){ clearInterval(S.tid); var ans=$("answer").value.trim(); var ok=matches(ans,S.letter,CATS[S.idx].key); S.answers[S.idx]=ans; S.scores[S.idx]=ok?10:0; var last=(S.idx>=CATS.length-1); var em,msg; if(ok){ em="⭐"; msg="أحسنت! +١٠"; snd("good"); speak(rand(VOICE_GOOD)); } else if(!ans){ em=timedOut?"⏰":"➡️"; msg="انتهى الوقت"; } else { em="🙂"; msg="محاولة حلوة"; } showSplash(em,msg,function(){ if(last){ showResultsSolo(); } else { S.idx++; snd("swoosh"); beginCategorySolo(); } }); }
   function showResultsSolo(){ clearInterval(S.tid); var total=0,stars=0; for(var i=0;i<CATS.length;i++){ total+=(S.scores[i]||0); if(S.scores[i]) stars++; } $("soloResults").style.display="block"; $("mpResults").style.display="none"; $("resMascot").textContent=S.animal; var title=stars>=6?"بطل خارق! 🎉":(stars>=4?"ممتاز جداً!":(stars>=2?"أحسنت!":"محاولة حلوة!")); $("resTitle").textContent=title; renderStars(stars); $("resScore").textContent="النقاط: "+total+" من 60"; var rv=$("review"); rv.innerHTML=""; CATS.forEach(function(cat,i){ var ans=S.answers[i]||"—",ok=!!S.scores[i]; var row=document.createElement("div"); row.className="rev-row"; row.innerHTML='<div class="ce">'+cat.emoji+'</div><div class="rc"><div class="ct">'+cat.name+'</div><div class="ans">'+escapeHtml(ans)+'</div></div><div class="mark">'+(ok?"✅":"⬜")+'</div>'; rv.appendChild(row); }); lbSave({name:S.name,animal:S.animal,score:total,date:Date.now()}); show("screen-results"); snd("win"); confettiBurst(); if(stars>=4) speak("أحسنت يا "+S.name); }
   function renderStars(stars){ var st=$("resStars"); st.innerHTML=""; for(var j=0;j<6;j++){ var sp=document.createElement("span"); sp.className="star"+(j<stars?"":" off"); sp.textContent="⭐"; sp.style.animationDelay=(j*0.08)+"s"; st.appendChild(sp); } }
   function showSplash(em,msg,done){ var sp=$("splash"); $("splashEm").textContent=em; $("splashMsg").textContent=msg; sp.classList.add("show"); setTimeout(function(){ sp.classList.remove("show"); done&&done(); },850); }
@@ -529,8 +565,8 @@
     },150);
   }
   function showCountIn(n){ if(!isActive("screen-countin")) show("screen-countin"); if(S.mpLastCount!==n){ S.mpLastCount=n; var el=$("countNum"); el.textContent=n; el.style.animation="none"; void el.offsetWidth; el.style.animation=""; snd("count"); speak(String(n)); } }
-  function onMpCategoryChange(newIdx){ if(S.mpCurIdx>=0){ var prev=(S.answers[S.mpCurIdx]||"").trim(); if(matches(prev,S.letter)){ snd("star"); floatChip("+10 ⭐"); } } if(newIdx===0){ snd("go"); speak("حرف "+letterName(S.letter)); } S.mpCurIdx=newIdx; setCategoryUI(newIdx); var inp=$("answer"); inp.value=""; inp.classList.remove("good"); $("live").textContent=""; $("live").className="live no"; if(newIdx>0) snd("swoosh"); setTimeout(function(){ try{ inp.focus(); }catch(e){} },50); }
-  function finalizeMP(){ var total=0,stars=0; for(var i=0;i<CATS.length;i++){ if(matches((S.answers[i]||""),S.letter)){ total+=10; stars++; } } if(fb.roomRef){ fb.roomRef.collection("players").doc(playerId()).update({score:total,stars:stars,done:true}).catch(function(){}); } showResultsMP(total,stars); }
+  function onMpCategoryChange(newIdx){ if(S.mpCurIdx>=0){ var prev=(S.answers[S.mpCurIdx]||"").trim(); if(matches(prev,S.letter,CATS[S.mpCurIdx].key)){ snd("star"); floatChip("+10 ⭐"); } } if(newIdx===0){ snd("go"); speak("حرف "+letterName(S.letter)); } S.mpCurIdx=newIdx; setCategoryUI(newIdx); var inp=$("answer"); inp.value=""; inp.classList.remove("good"); $("live").textContent=""; $("live").className="live no"; if(newIdx>0) snd("swoosh"); setTimeout(function(){ try{ inp.focus(); }catch(e){} },50); }
+  function finalizeMP(){ var total=0,stars=0; for(var i=0;i<CATS.length;i++){ if(matches((S.answers[i]||""),S.letter,CATS[i].key)){ total+=10; stars++; } } if(fb.roomRef){ fb.roomRef.collection("players").doc(playerId()).update({score:total,stars:stars,done:true}).catch(function(){}); } showResultsMP(total,stars); }
   function showResultsMP(total,stars){ $("soloResults").style.display="none"; $("mpResults").style.display="block"; $("resMascot").textContent=S.animal; $("resTitle").textContent="خلصت! 🏁"; renderStars(stars); $("resScore").textContent="نقاطك: "+total+" من 60"; show("screen-results"); snd("win"); confettiBurst(); renderMpLeaderboard(); $("newRoundBtn").style.display=S.isHost?"block":"none"; $("waitHostNote").style.display=S.isHost?"none":"block"; }
   function renderMpLeaderboard(){ var arr=S.players.slice().sort(function(a,b){ return (b.score||0)-(a.score||0) || (b.stars||0)-(a.stars||0); }); var allDone=arr.length>0 && arr.every(function(p){ return p.done; }); var medals=["🥇","🥈","🥉"]; var h=""; arr.forEach(function(p,i){ var me=p._id===playerId(); var rankDisp=(p.done&&i<3)?medals[i]:(i+1); var stat=p.done?((p.stars||0)+" ⭐"):"يلعب…"; h+='<div class="lb-row'+(me?" me":"")+(allDone&&i===0?" win":"")+'"><div class="rank">'+rankDisp+'</div><div class="em">'+(p.animal||"🙂")+'</div><div class="nm">'+escapeHtml(p.name)+(me?" (أنت)":"")+'</div><div style="text-align:left;"><div class="sc">'+(p.score||0)+'</div><div class="stat">'+stat+'</div></div></div>'; }); $("mpLeaderboard").innerHTML=h||'<div class="hint">في انتظار النتائج…</div>'; if(allDone&&S.isHost){ var top=arr[0]; if(top && !$("mpLeaderboard").dataset.announced){ $("mpLeaderboard").dataset.announced="1"; speak("الفائز "+top.name); } } }
   function newRound(){ if($("mpLeaderboard")) delete $("mpLeaderboard").dataset.announced; startChallenge(); }
@@ -549,11 +585,13 @@
     $("answer").addEventListener("input",function(e){
       var val=e.target.value;
       if(S.mode==="mp" && S.mpCurIdx>=0){ S.answers[S.mpCurIdx]=val; }
-      var ok=matches(val,S.letter); var inp=e.target,live=$("live");
+      var ci=(S.mode==="mp")?S.mpCurIdx:S.idx; var cat=CATS[ci]||{}; var ck=cat.key;
+      var ok=matches(val,S.letter,ck); var inp=e.target,live=$("live");
       if(val.trim()===""){ inp.classList.remove("good"); live.textContent=""; live.className="live no"; return; }
-      if(ok){ if(!inp.classList.contains("good")) snd("good"); inp.classList.add("good"); live.textContent="👍 تمام! تبدأ بحرف "+S.letter; live.className="live ok"; }
-      else if(startsWithLetter(val,S.letter)){ inp.classList.remove("good"); live.textContent="اكتب كلمة كاملة تبدأ بحرف "+S.letter; live.className="live no"; }
-      else { inp.classList.remove("good"); live.textContent="لازم تبدأ بحرف "+S.letter; live.className="live no"; }
+      if(ok){ if(!inp.classList.contains("good")) snd("good"); inp.classList.add("good"); live.textContent="👍 تمام!"; live.className="live ok"; }
+      else if(!startsWithLetter(val,S.letter)){ inp.classList.remove("good"); live.textContent="لازم تبدأ بحرف "+S.letter; live.className="live no"; }
+      else if(isListedCat(ck)){ inp.classList.remove("good"); live.textContent="اكتب اسم "+(cat.name||"")+" حقيقياً بحرف "+S.letter; live.className="live no"; }
+      else { inp.classList.remove("good"); live.textContent="اكتب كلمة كاملة تبدأ بحرف "+S.letter; live.className="live no"; }
     });
     $("answer").addEventListener("keydown",function(e){ if(e.key==="Enter" && S.mode==="solo"){ e.preventDefault(); endCategorySolo(false); } });
     $("nextBtn").addEventListener("click",function(){ if(S.mode==="solo") endCategorySolo(false); });
@@ -572,7 +610,7 @@
     $("helpBtn").addEventListener("click",function(){ $("rulesBody").classList.toggle("open"); });
   }
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
-  window.__HUROOF__={matches:matches,startsWithLetter:startsWithLetter,isWord:isWord,normChar:normChar,mpCategoryState:mpCategoryState,LETTERS:LETTERS,CATS:CATS};
+  window.__HUROOF__={matches:matches,startsWithLetter:startsWithLetter,isWord:isWord,inList:inList,normWord:normWord,WORD_LISTS:WORD_LISTS,normChar:normChar,mpCategoryState:mpCategoryState,LETTERS:LETTERS,CATS:CATS};
   if("serviceWorker" in navigator){ window.addEventListener("load",function(){ navigator.serviceWorker.register("sw.js").catch(function(){}); }); }
 })();
 </script>
