@@ -1,5 +1,5 @@
 /* لعبة الحروف - Service Worker */
-const CACHE = 'huroof-v6';
+const CACHE = 'huroof-v7';
 const ASSETS = ['./', './index.html', './manifest.json', './icon.svg'];
 
 self.addEventListener('install', (e) => {
@@ -19,24 +19,44 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (req.method !== 'GET') return;
+  let url;
+  try { url = new URL(req.url); } catch (err) { return; }
+  // دع الطلبات الخارجية (خطوط Google / Firebase) تمر للشبكة مباشرة
+  if (url.origin !== self.location.origin) return;
+
+  const isDoc =
+    req.mode === 'navigate' ||
+    req.destination === 'document' ||
+    url.pathname.endsWith('/') ||
+    url.pathname.endsWith('/index.html');
+
+  if (isDoc) {
+    // الشبكة أولاً للصفحة: المستخدم يحصل دائماً على آخر نسخة عند الاتصال، ويرجع للكاش دون اتصال
+    e.respondWith(
+      fetch(req)
+        .then((res) => {
+          const copy = res.clone();
+          caches.open(CACHE).then((c) => c.put('./index.html', copy));
+          return res;
+        })
+        .catch(() => caches.match('./index.html').then((r) => r || caches.match('./')))
+    );
+    return;
+  }
+
+  // باقي الأصول: الكاش أولاً (سريع) مع تحديث في الخلفية
   e.respondWith(
     caches.match(req).then((cached) => {
-      return (
-        cached ||
-        fetch(req)
-          .then((res) => {
-            // cache same-origin successful responses for next time
-            try {
-              const url = new URL(req.url);
-              if (url.origin === self.location.origin && res && res.status === 200) {
-                const copy = res.clone();
-                caches.open(CACHE).then((c) => c.put(req, copy));
-              }
-            } catch (err) {}
-            return res;
-          })
-          .catch(() => caches.match('./index.html'))
-      );
+      const fetched = fetch(req)
+        .then((res) => {
+          if (res && res.status === 200) {
+            const copy = res.clone();
+            caches.open(CACHE).then((c) => c.put(req, copy));
+          }
+          return res;
+        })
+        .catch(() => cached);
+      return cached || fetched;
     })
   );
 });

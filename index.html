@@ -244,6 +244,7 @@
         <button class="btn purple" id="mpBtn" disabled>تحدي الأصدقاء 👥</button>
       </div>
       <div class="lb-mini" id="lbMini"></div>
+      <div style="text-align:center;margin-top:12px;font-size:12px;color:var(--muted);opacity:.7;">الإصدار ٧ · ٣٠ ثانية</div>
     </section>
 
     <!-- LOBBY -->
@@ -280,8 +281,8 @@
           <div class="card">
             <div class="label">⏱️ وقت كل خانة</div>
             <div class="seg" id="timeSeg">
-              <button data-sec="30">٣٠ ثانية</button>
-              <button data-sec="60" class="on">دقيقة</button>
+              <button data-sec="30" class="on">٣٠ ثانية</button>
+              <button data-sec="60">دقيقة</button>
             </div>
           </div>
           <div style="margin-top:14px;"><button class="btn" id="startChallengeBtn">ابدأ التحدي 🚀</button></div>
@@ -396,7 +397,7 @@
   var S = {
     name:"",animal:"",letter:"",idx:0,answers:[],scores:[],
     timeLeft:60,tid:null,sound:true,voice:true,mode:"solo",
-    perCat:60,isHost:false,roomCode:"",playerId:"",
+    perCat:30,isHost:false,roomCode:"",playerId:"",
     startedAt:0,mpRound:-1,mpCurIdx:-1,mpInterval:null,mpRunToken:0,mpLastCount:null,players:[]
   };
 
@@ -493,7 +494,7 @@
   function setCategoryUI(i){ var cat=CATS[i]; $("catEmoji").textContent=cat.emoji; $("catName").textContent=cat.name; $("catLetter").textContent=S.letter; buildDotsAt(i); }
 
   function startSolo(){ S.mode="solo"; S.letter=rand(LETTERS); S.idx=0; S.answers=[]; S.scores=[]; ac(); $("revealMascot").textContent=S.animal; $("revealLetter").textContent=S.letter; $("revealBubble").textContent=rand(CHEERS); show("screen-reveal"); snd("count"); setTimeout(function(){ snd("go"); },150); speak("حرف "+letterName(S.letter)); }
-  function beginCategorySolo(){ $("playLetter").textContent=S.letter; $("playAnimal").textContent=S.animal; $("playName").textContent=S.name; setCategoryUI(S.idx); var inp=$("answer"); inp.value=""; inp.classList.remove("good"); $("live").textContent=""; $("live").className="live no"; $("mpNote").style.display="none"; $("playActions").style.display="block"; show("screen-play"); S.timeLeft=60; updateTimerUI(60,60); setTimeout(function(){ try{ inp.focus(); }catch(e){} },60); clearInterval(S.tid); S.tid=setInterval(function(){ S.timeLeft--; updateTimerUI(S.timeLeft,60); if(S.timeLeft<=10&&S.timeLeft>0) snd(S.timeLeft<=3?"tickHot":"tick"); if(S.timeLeft<=0){ clearInterval(S.tid); snd("timeup"); endCategorySolo(true); } },1000); }
+  function beginCategorySolo(){ $("playLetter").textContent=S.letter; $("playAnimal").textContent=S.animal; $("playName").textContent=S.name; setCategoryUI(S.idx); var inp=$("answer"); inp.value=""; inp.classList.remove("good"); $("live").textContent=""; $("live").className="live no"; $("mpNote").style.display="none"; $("playActions").style.display="block"; show("screen-play"); S.timeLeft=30; updateTimerUI(30,30); setTimeout(function(){ try{ inp.focus(); }catch(e){} },60); clearInterval(S.tid); S.tid=setInterval(function(){ S.timeLeft--; updateTimerUI(S.timeLeft,30); if(S.timeLeft<=10&&S.timeLeft>0) snd(S.timeLeft<=3?"tickHot":"tick"); if(S.timeLeft<=0){ clearInterval(S.tid); snd("timeup"); endCategorySolo(true); } },1000); }
   function endCategorySolo(timedOut){ clearInterval(S.tid); var ans=$("answer").value.trim(); var ok=matches(ans,S.letter,CATS[S.idx].key); S.answers[S.idx]=ans; S.scores[S.idx]=ok?10:0; var last=(S.idx>=CATS.length-1); var em,msg; if(ok){ em="⭐"; msg="أحسنت! +١٠"; snd("good"); speak(rand(VOICE_GOOD)); } else if(!ans){ em=timedOut?"⏰":"➡️"; msg="انتهى الوقت"; } else { em="🙂"; msg="محاولة حلوة"; } showSplash(em,msg,function(){ if(last){ showResultsSolo(); } else { S.idx++; snd("swoosh"); beginCategorySolo(); } }); }
   function showResultsSolo(){ clearInterval(S.tid); var total=0,stars=0; for(var i=0;i<CATS.length;i++){ total+=(S.scores[i]||0); if(S.scores[i]) stars++; } $("soloResults").style.display="block"; $("mpResults").style.display="none"; $("resMascot").textContent=S.animal; var title=stars>=6?"بطل خارق! 🎉":(stars>=4?"ممتاز جداً!":(stars>=2?"أحسنت!":"محاولة حلوة!")); $("resTitle").textContent=title; renderStars(stars); $("resScore").textContent="النقاط: "+total+" من 60"; var rv=$("review"); rv.innerHTML=""; CATS.forEach(function(cat,i){ var ans=S.answers[i]||"—",ok=!!S.scores[i]; var row=document.createElement("div"); row.className="rev-row"; row.innerHTML='<div class="ce">'+cat.emoji+'</div><div class="rc"><div class="ct">'+cat.name+'</div><div class="ans">'+escapeHtml(ans)+'</div></div><div class="mark">'+(ok?"✅":"⬜")+'</div>'; rv.appendChild(row); }); lbSave({name:S.name,animal:S.animal,score:total,date:Date.now()}); show("screen-results"); snd("win"); confettiBurst(); if(stars>=4) speak("أحسنت يا "+S.name); }
   function renderStars(stars){ var st=$("resStars"); st.innerHTML=""; for(var j=0;j<6;j++){ var sp=document.createElement("span"); sp.className="star"+(j<stars?"":" off"); sp.textContent="⭐"; sp.style.animationDelay=(j*0.08)+"s"; st.appendChild(sp); } }
@@ -523,7 +524,7 @@
     ref.get().then(function(doc){
       if(doc.exists){ return createRoom(); }
       S.isHost=true; S.roomCode=code; fb.roomRef=ref;
-      return ref.set({host:playerId(),status:"lobby",round:0,perCat:60,letter:"",startedAt:0,createdAt:firebase.firestore.FieldValue.serverTimestamp()})
+      return ref.set({host:playerId(),status:"lobby",round:0,perCat:30,letter:"",startedAt:0,createdAt:firebase.firestore.FieldValue.serverTimestamp()})
         .then(function(){ return ref.collection("players").doc(playerId()).set({name:S.name,animal:S.animal,score:0,stars:0,done:false,joinedAt:firebase.firestore.FieldValue.serverTimestamp()}); })
         .then(function(){ enterRoomUI(); attachRoomListeners(); });
     }).catch(function(){ $("lobbyError").textContent="صار خطأ أثناء إنشاء الغرفة، حاول مرة ثانية."; });
@@ -611,7 +612,7 @@
   }
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
   window.__HUROOF__={matches:matches,startsWithLetter:startsWithLetter,isWord:isWord,inList:inList,normWord:normWord,WORD_LISTS:WORD_LISTS,normChar:normChar,mpCategoryState:mpCategoryState,LETTERS:LETTERS,CATS:CATS};
-  if("serviceWorker" in navigator){ window.addEventListener("load",function(){ navigator.serviceWorker.register("sw.js").catch(function(){}); }); }
+  if("serviceWorker" in navigator){ window.addEventListener("load",function(){ navigator.serviceWorker.register("sw.js").then(function(reg){ try{ reg.update(); }catch(e){} setInterval(function(){ try{ reg.update(); }catch(e){} }, 60000); }).catch(function(){}); var reloaded=false; navigator.serviceWorker.addEventListener("controllerchange",function(){ if(reloaded) return; reloaded=true; window.location.reload(); }); }); }
 })();
 </script>
 </body>
