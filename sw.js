@@ -1,5 +1,5 @@
 /* لعبة الحروف - Service Worker */
-const CACHE = 'huroof-v4';
+const CACHE = 'huroof-v5';
 const ASSETS = ['./', './index.html', './manifest.json', './icon.svg'];
 
 self.addEventListener('install', (e) => {
